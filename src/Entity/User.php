@@ -52,6 +52,12 @@ class User
      */
     private $roles = [];
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Company::class, inversedBy="users")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $company;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -137,6 +143,18 @@ class User
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getCompany(): ?Company
+    {
+        return $this->company;
+    }
+
+    public function setCompany(?Company $company): self
+    {
+        $this->company = $company;
 
         return $this;
     }
