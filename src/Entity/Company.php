@@ -30,7 +30,7 @@ class Company
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=16)
+     * @ORM\Column(type="string", length=32)
      */
     private $phone;
 
@@ -60,7 +60,7 @@ class Company
     private $registrationDate;
 
     /**
-     * @ORM\OneToMany(targetEntity=User::class, mappedBy="company", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=User::class, mappedBy="company", orphanRemoval=true, cascade={"persist", "remove"})
      */
     private $users;
 
