@@ -22,3 +22,15 @@ Vous pouvez voir la démo du projet [ici](https://snowtricks.romainlouet.fr/)
 `composer install --optimize-autoloader`
 
 #### Configuration
+##### .env
+*   APP_ENV=dev
+*   DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=5.7"
+##### Création de la bdd
+    * php bin/console doctrine:database:create
+##### Création des tables
+    * php bin/console doctrine:schema:create
+##### Création des données
+    *php bin/console doctrine:fixtures:load
+#### Utilisation
+contact@snowtricks.com
+admin
