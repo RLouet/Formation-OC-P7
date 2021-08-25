@@ -5,57 +5,31 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=ProductRepository::class)
- */
+#[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    use EntityIdManagementTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $reference;
+    #[ORM\Column(type: "string", length: 255, unique: true)]
+    private string $reference;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $brand;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $brand;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $name;
 
-    /**
-     * @ORM\Column(type="string", length=64)
-     */
-    private $color;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $color;
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $description;
+    #[ORM\Column(type: "text")]
+    private string $description;
 
-    /**
-     * @ORM\Column(type="float")
-     */
-    private $size;
+    #[ORM\Column(type: "float")]
+    private float $size;
 
-    /**
-     * @ORM\Column(type="float")
-     */
-    private $price;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    #[ORM\Column(type: "float")]
+    private float $price;
 
     public function getReference(): ?string
     {

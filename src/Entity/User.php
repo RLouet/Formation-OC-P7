@@ -7,63 +7,35 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    use EntityIdManagementTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $username;
+    #[ORM\Column(type: "string", length: 128, unique: true)]
+    private string $username;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
+    #[ORM\Column(type: "string", length: 180, unique: true)]
+    private string $email;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $password;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $password;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $lastName;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $lastName;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $firstName;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $firstName;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $registrationDate;
+    #[ORM\Column(type: "datetime")]
+    private \DateTimeInterface $registrationDate;
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
+    #[ORM\Column(type: "json")]
+    private array $roles = [];
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Company::class, inversedBy="users")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $company;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]
+    #[ORM\JoinColumn(nullable: false)]
+    private Company $company;
 
     public function getUsername(): ?string
     {

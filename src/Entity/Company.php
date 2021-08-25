@@ -7,71 +7,46 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=CompanyRepository::class)
- */
+#[ORM\Entity(repositoryClass: CompanyRepository::class)]
 class Company
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+    use EntityIdManagementTrait;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $name;
+    #[ORM\Column(type: "string", length: 128, unique: true)]
+    private string $name;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
+    #[ORM\Column(type: "string", length: 180, unique: true)]
+    private string $email;
 
-    /**
-     * @ORM\Column(type="string", length=32)
-     */
-    private $phone;
+    #[ORM\Column(type: "string", length: 32)]
+    private string $phone;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $address;
+    #[ORM\Column(type: "string", length: 255)]
+    private string $address;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $zip;
+    #[ORM\Column(type: "integer")]
+    private int $zip;
 
-    /**
-     * @ORM\Column(type="string", length=128)
-     */
-    private $city;
+    #[ORM\Column(type: "string", length: 128)]
+    private string $city;
 
-    /**
-     * @ORM\Column(type="string", length=128)
-     */
-    private $country;
+    #[ORM\Column(type: "string", length: 128)]
+    private string $country;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $registrationDate;
+    #[ORM\Column(type: "datetime")]
+    private \DateTimeInterface $registrationDate;
 
-    /**
-     * @ORM\OneToMany(targetEntity=User::class, mappedBy="company", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    private $users;
+    #[ORM\OneToMany(
+        mappedBy: "company",
+        targetEntity: User::class,
+        cascade: ["persist", "remove"],
+        orphanRemoval: true
+    )]
+    private Collection $users;
 
     public function __construct()
     {
         $this->users = new ArrayCollection();
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
     }
 
     public function getName(): ?string
