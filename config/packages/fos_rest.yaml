@@ -5,7 +5,7 @@ fos_rest:
 #    routing_loader: true
     view:
         formats: { json: true, xml: false, rss: false }
-#        view_response_listener:  true
+        view_response_listener:  true
 #    exception:
 #        codes:
 #            App\Exception\MyException: 403
@@ -14,6 +14,9 @@ fos_rest:
 #    format_listener:
 #        rules:
 #            - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
+    format_listener:
+        rules:
+            - { path: ^/api, prefer_extension: true, fallback_format:  json, priorities: [ json ] }
     serializer:
         serialize_null: true
     body_converter:

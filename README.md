@@ -32,5 +32,9 @@ Vous pouvez voir la démo du projet [ici](https://snowtricks.romainlouet.fr/)
 ##### Création des données
     *php bin/console doctrine:fixtures:load
 #### Utilisation
-contact@snowtricks.com
+contact@bilemo.com
 admin
+#####routes
+get product :
+/api/product/{id}
+
