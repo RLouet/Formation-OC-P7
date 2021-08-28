@@ -6,6 +6,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 class User implements PasswordAuthenticatedUserInterface, UserInterface
@@ -13,24 +14,29 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
+    #[Serializer\Groups(["USER_LIST"])]
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
+    #[Serializer\Groups(["USER_LIST"])]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
     private string $password;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["USER_LIST"])]
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["USER_LIST"])]
     private string $firstName;
 
     #[ORM\Column(type: "datetime")]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
+    #[Serializer\Groups(["USER_LIST"])]
     private array $roles = [];
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]

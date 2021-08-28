@@ -20,7 +20,7 @@ class ProductController extends AbstractFOSRestController
      * )
      * @Rest\View()
      */
-    public function getProducts(Product $product)
+    public function getProduct(Product $product)
     {
         return $product;
     }
