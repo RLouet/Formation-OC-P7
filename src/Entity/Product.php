@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -11,15 +12,19 @@ class Product
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 255, unique: true)]
+    #[Serializer\Groups(["PRODUCT_LIST"])]
     private string $reference;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["PRODUCT_LIST"])]
     private string $brand;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["PRODUCT_LIST"])]
     private string $name;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["PRODUCT_LIST"])]
     private string $color;
 
     #[ORM\Column(type: "text")]
