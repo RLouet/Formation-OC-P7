@@ -31,4 +31,23 @@ class UserController extends AbstractFOSRestController
         return $users;
     }
 
+    /**
+     * @Rest\Get(
+     *     path = "/company/{company_id}/user/{user_id}",
+     *     name = "app_user_show",
+     *     requirements = {"company_id"="\d+", "user_id"="\d+"}
+     * )
+     * @Rest\View(
+     *     serializerGroups = {"USER_LIST", "USER_DETAILS"}
+     * )
+     */
+    #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
+    #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
+    public function getUserDetails(Company $company, User $user, UserRepository $userRepository)
+    {
+        if ($user->getCompany() === $company) {
+            return $user;
+        }
+        return null;
+    }
 }
