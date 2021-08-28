@@ -19,7 +19,9 @@ class UserController extends AbstractFOSRestController
      *     name = "app_users_list",
      *     requirements = {"id"="\d+"}
      * )
-     * @Rest\View()
+     * @Rest\View(
+     *     serializerGroups = {"USER_LIST"}
+     * )
      */
     public function getUsersList(Company $company, UserRepository $userRepository)
     {
