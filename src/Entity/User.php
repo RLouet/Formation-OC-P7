@@ -4,21 +4,30 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity("email")]
+#[UniqueEntity("username")]
 class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
     #[Serializer\Groups(["USER_LIST"])]
+    #[Assert\Regex(
+        pattern: '/[a-zA-Z0-9]{5,128}/',
+        message: "Between 5 and 128 letters and numbers only."
+    )]
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
     #[Serializer\Groups(["USER_LIST"])]
+    #[Assert\Email]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
@@ -26,10 +35,24 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["USER_LIST"])]
+    #[Assert\Length(
+        min: 2,
+        max: 255
+    )]
+    #[Assert\Regex(
+        pattern: '/^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
+    )]
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["USER_LIST"])]
+    #[Assert\Length(
+        min: 2,
+        max: 255
+    )]
+    #[Assert\Regex(
+        pattern: '/^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
+    )]
     private string $firstName;
 
     #[ORM\Column(type: "datetime")]
