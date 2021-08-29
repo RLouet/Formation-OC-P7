@@ -34,11 +34,13 @@ Vous pouvez voir la démo du projet [ici](https://snowtricks.romainlouet.fr/)
 #### Utilisation
 contact@bilemo.com
 admin
-#####routes
-######Get products list :
+##### Routes
+###### Get products list :
     /api/product
-######Get product details :
+###### Get product details :
     /api/product/{id}
-######Get company's users list :
+###### Get company's users list :
     /api/company/{company_id}/user
+###### Get company's user details :
+    /api/company/{company_id}/user/{user_id}
 

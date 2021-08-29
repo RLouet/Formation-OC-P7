@@ -33,6 +33,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $firstName;
 
     #[ORM\Column(type: "datetime")]
+    #[Serializer\Groups(["USER_DETAILS"])]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
@@ -41,6 +42,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]
     #[ORM\JoinColumn(nullable: false)]
+    #[Serializer\Groups(["USER_DETAILS"])]
     private Company $company;
 
     public function getUsername(): ?string
