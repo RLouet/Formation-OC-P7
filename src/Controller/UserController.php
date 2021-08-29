@@ -16,7 +16,7 @@ class UserController extends AbstractFOSRestController
 {
     /**
      * @Rest\Get(
-     *     path = "/company/{company_id}/user",
+     *     path = "/companies/{company_id}/users",
      *     name = "app_users_list",
      *     requirements = {"company_id"="\d+"}
      * )
@@ -33,7 +33,7 @@ class UserController extends AbstractFOSRestController
 
     /**
      * @Rest\Get(
-     *     path = "/company/{company_id}/user/{user_id}",
+     *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_show",
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
@@ -49,5 +49,23 @@ class UserController extends AbstractFOSRestController
             return $user;
         }
         return null;
+    }
+
+    /**
+     * @Rest\Post(
+     *     path = "/companies/{company_id}/users",
+     *     name = "app_user_create",
+     *     requirements = {"company_id"="\d+"}
+     * )
+     * @Rest\View
+     */
+    #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
+    #[ParamConverter("user", converter: "fos_rest.request_body")]
+    public function createUser(Company $company, User $user)
+    {
+        $user
+            ->setCompany($company)
+            ->setRegistrationDate(new \DateTime());
+        dd($user);
     }
 }

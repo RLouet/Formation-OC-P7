@@ -36,11 +36,11 @@ contact@bilemo.com
 admin
 ##### Routes
 ###### Get products list :
-    /api/product
+    /api/products
 ###### Get product details :
-    /api/product/{id}
+    /api/products/{id}
 ###### Get company's users list :
-    /api/company/{company_id}/user
+    /api/companies/{company_id}/user
 ###### Get company's user details :
-    /api/company/{company_id}/user/{user_id}
+    /api/companies/{company_id}/users/{user_id}
 
