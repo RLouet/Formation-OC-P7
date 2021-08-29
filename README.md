@@ -40,7 +40,9 @@ admin
 ###### Get product details :
     /api/products/{id}
 ###### Get company's users list :
-    /api/companies/{company_id}/user
+    /api/companies/{company_id}/users
 ###### Get company's user details :
     /api/companies/{company_id}/users/{user_id}
+###### Post company's user :
+    /api/companies/{company_id}/users
 

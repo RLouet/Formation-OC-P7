@@ -5,9 +5,11 @@ namespace App\Controller;
 use App\Entity\Company;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * @Rest\Route("/api")
@@ -57,15 +59,23 @@ class UserController extends AbstractFOSRestController
      *     name = "app_user_create",
      *     requirements = {"company_id"="\d+"}
      * )
-     * @Rest\View
+     * @Rest\View(
+     *     StatusCode = 201,
+     *     serializerGroups = {"USER_LIST", "USER_DETAILS"}
+     * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", converter: "fos_rest.request_body")]
-    public function createUser(Company $company, User $user)
+    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager)
     {
         $user
             ->setCompany($company)
-            ->setRegistrationDate(new \DateTime());
-        dd($user);
+            ->setRegistrationDate(new \DateTime())
+            ->setPassword($passwordHasher->hashPassword($user, $user->getPassword()))
+            ->setRoles(["ROLE_USER"])
+        ;
+        $entityManager->persist($user);
+        $entityManager->flush();
+        return $user;
     }
 }
