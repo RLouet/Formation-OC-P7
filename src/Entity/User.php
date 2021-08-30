@@ -32,6 +32,10 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["USER_CREATE"])]
+    #[Assert\Length(
+        min: 8,
+        max: 128
+    )]
     private string $password;
 
     #[ORM\Column(type: "string", length: 255)]
