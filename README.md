@@ -36,13 +36,15 @@ contact@bilemo.com
 admin
 ##### Routes
 ###### Get products list :
-    /api/products
+    GET /api/products
 ###### Get product details :
-    /api/products/{id}
+    GET /api/products/{id}
 ###### Get company's users list :
-    /api/companies/{company_id}/users
+    GET /api/companies/{company_id}/users
 ###### Get company's user details :
-    /api/companies/{company_id}/users/{user_id}
+    GET /api/companies/{company_id}/users/{user_id}
 ###### Post company's user :
-    /api/companies/{company_id}/users
+    POST /api/companies/{company_id}/users
+###### Delete company's user :
+    DELETE /api/companies/{company_id}/users
 
