@@ -20,7 +20,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[ORM\Column(type: "string", length: 128, unique: true)]
     #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
     #[Assert\Regex(
-        pattern: '/[a-zA-Z0-9]{5,128}/',
+        pattern: '/^[a-zA-Z0-9]{5,128}$/',
         message: "Between 5 and 128 letters and numbers only."
     )]
     private string $username;
