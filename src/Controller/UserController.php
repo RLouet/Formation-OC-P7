@@ -68,7 +68,15 @@ class UserController extends AbstractFOSRestController
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    #[ParamConverter("user", options: ['deserializationContext' => ['groups' => ['USER_CREATE']]], converter: "fos_rest.request_body")]
+    #[ParamConverter(
+        "user",
+        options: [
+            'deserializationContext' => [
+                'groups' => ['USER_CREATE']
+            ]
+        ],
+        converter: "fos_rest.request_body")
+    ]
     public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations)
     {
         $user
