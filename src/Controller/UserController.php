@@ -12,6 +12,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Constraints\IsFalse;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Rest\Route("/api")
@@ -67,8 +69,8 @@ class UserController extends AbstractFOSRestController
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    #[ParamConverter("user", converter: "fos_rest.request_body")]
-    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager)
+    #[ParamConverter("user", options: ['deserializationContext' => ['groups' => ['USER_CREATE']]], converter: "fos_rest.request_body")]
+    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ValidatorInterface $validator)
     {
         $user
             ->setCompany($company)
@@ -76,6 +78,13 @@ class UserController extends AbstractFOSRestController
             ->setPassword($passwordHasher->hashPassword($user, $user->getPassword()))
             ->setRoles(["ROLE_USER"])
         ;
+
+        $errors = $validator->validate(($user));
+
+        if (count($errors)) {
+            return $this->view($errors, Response::HTTP_BAD_REQUEST);
+        }
+
         $entityManager->persist($user);
         $entityManager->flush();
         return $this->view(

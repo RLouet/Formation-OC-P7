@@ -18,7 +18,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["USER_LIST"])]
+    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
     #[Assert\Regex(
         pattern: '/[a-zA-Z0-9]{5,128}/',
         message: "Between 5 and 128 letters and numbers only."
@@ -26,32 +26,33 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["USER_LIST"])]
+    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
     #[Assert\Email]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["USER_CREATE"])]
     private string $password;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["USER_LIST"])]
+    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
     #[Assert\Length(
         min: 2,
         max: 255
     )]
     #[Assert\Regex(
-        pattern: '/^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
+        pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["USER_LIST"])]
+    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
     #[Assert\Length(
         min: 2,
         max: 255
     )]
     #[Assert\Regex(
-        pattern: '/^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
+        pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
     private string $firstName;
 
