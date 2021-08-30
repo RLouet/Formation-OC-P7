@@ -98,4 +98,24 @@ class UserController extends AbstractFOSRestController
             ['Location' => $this->generateUrl('app_user_show', ['company_id' => $user->getCompany()->getId(), 'user_id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
         );
     }
+
+    /**
+     * @Rest\View(StatusCode = 204)
+     * @Rest\Delete(
+     *     path = "/companies/{company_id}/users/{user_id}",
+     *     name = "app_user_delete",
+     *     requirements = {"company_id"="\d+", "user_id"="\d+"}
+     * )
+     */
+    #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
+    #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
+    public function deleteUser(Company $company, User $user, EntityManagerInterface $manager)
+    {
+        if ($user->getCompany() === $company) {
+            $manager->remove($user);
+            $manager->flush();
+            return null;
+        }
+        return $this->view("Invalid User", Response::HTTP_BAD_REQUEST);
+    }
 }
