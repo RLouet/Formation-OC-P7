@@ -35,16 +35,24 @@ Vous pouvez voir la démo du projet [ici](https://snowtricks.romainlouet.fr/)
 contact@bilemo.com
 admin
 ##### Routes
-###### Get products list :
+###### Get products list
     GET /api/products
-###### Get product details :
+  * keyword (brand, name)
+  * order
+  * limit
+  * page
+###### Get product details
     GET /api/products/{id}
-###### Get company's users list :
+###### Get company's users list
     GET /api/companies/{company_id}/users
-###### Get company's user details :
+  * keyword (firstName, lastName, username, email)
+  * order
+  * limit
+  * page
+###### Get company's user details
     GET /api/companies/{company_id}/users/{user_id}
-###### Post company's user :
+###### Post company's user
     POST /api/companies/{company_id}/users
-###### Delete company's user :
+###### Delete company's user
     DELETE /api/companies/{company_id}/users
 
