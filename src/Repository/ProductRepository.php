@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Product;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -12,11 +11,30 @@ use Doctrine\Persistence\ManagerRegistry;
  * @method Product[]    findAll()
  * @method Product[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class ProductRepository extends ServiceEntityRepository
+class ProductRepository extends AbstractRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
+    }
+
+    public function search(string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1)
+    {
+        //$term = "apple";
+        $qb = $this
+            ->createQueryBuilder('p')
+            ->select('p')
+            ->addOrderBy('p.brand', $order)
+            ->addOrderBy('p.name', $order)
+            ;
+        if ($term) {
+            $qb
+                ->where('p.name LIKE :term OR p.brand LIKE :term')
+                ->setParameter('term', $term)
+                ;
+        }
+
+        return $this->paginate($qb, $limit, $page);
     }
 
     // /**
