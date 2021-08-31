@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
+use FOS\RestBundle\Request\ParamFetcherInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -25,15 +26,61 @@ class UserController extends AbstractFOSRestController
      *     name = "app_users_list",
      *     requirements = {"company_id"="\d+"}
      * )
+     * @Rest\QueryParam(
+     *     name="keyword",
+     *     requirements="[a-zA-Z0-9]+",
+     *     nullable=true,
+     *     description="The keyword to search for."
+     * )
+     * @Rest\QueryParam(
+     *     name="order",
+     *     requirements="asc|desc",
+     *     default="asc",
+     *     description="Sort order (asc or desc)"
+     * )
+     * @Rest\QueryParam(
+     *     name="limit",
+     *     requirements="\d+",
+     *     default="20",
+     *     description="Max number of product per page."
+     * )
+     * @Rest\QueryParam(
+     *     name="page",
+     *     requirements="\d+",
+     *     default="1",
+     *     description="The pagination page."
+     * )
      * @Rest\View(
      *     serializerGroups = {"USER_LIST"}
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    public function getUsersList(Company $company, UserRepository $userRepository)
+    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher)
     {
-        $users = $userRepository->findBy(['company' => $company], ['lastName' => 'ASC', 'firstName' => 'ASC']);
-        return $users;
+        //dd($company);
+        /*$users = $userRepository->findBy(['company' => $company], ['lastName' => 'ASC', 'firstName' => 'ASC']);
+        return $users;*/
+
+        $pager = $userRepository->search(
+            $company,
+            $paramFetcher->get("keyword"),
+            $paramFetcher->get("order"),
+            $paramFetcher->get("limit"),
+            $paramFetcher->get("page")
+        );
+
+        $response = [
+            "data" => $pager->getCurrentPageResults(),
+            "meta" => [
+                "limit" => $paramFetcher->get("limit"),
+                "current items" => count($pager->getCurrentPageResults()),
+                "total items" => $pager->getNbResults(),
+                "current page" => $pager->getCurrentPage(),
+                "total pages" => $pager->getNbPages()
+            ]
+        ];
+
+        return $response;
     }
 
     /**

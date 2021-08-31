@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Product;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
@@ -18,9 +19,8 @@ class ProductRepository extends AbstractRepository
         parent::__construct($registry, Product::class);
     }
 
-    public function search(string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1)
+    public function search(string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1): Pagerfanta
     {
-        //$term = "apple";
         $qb = $this
             ->createQueryBuilder('p')
             ->select('p')
