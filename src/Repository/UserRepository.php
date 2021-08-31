@@ -32,12 +32,12 @@ class UserRepository extends AbstractRepository
         if ($company) {
             $qb
                 ->where('u.company = :company')
-                ->setParameter(':company', $company)
+                ->setParameter('company', $company)
             ;
         }
         if ($term) {
             $qb
-                ->where('u.lastName LIKE :term OR u.firstName LIKE :term OR u.username LIKE :term OR u.email LIKE :term')
+                ->andWhere('u.lastName LIKE :term OR u.firstName LIKE :term OR u.username LIKE :term OR u.email LIKE :term')
                 ->setParameter('term', $term)
             ;
         }
