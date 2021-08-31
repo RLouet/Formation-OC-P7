@@ -37,22 +37,21 @@ admin
 ##### Routes
 ###### Get products list
     GET /api/products
-* keyword (brand, name)
-* order
-* limit
-* page
+*   keyword (brand, name)
+*   order
+*   limit
+*   page
 ###### Get product details
     GET /api/products/{id}
 ###### Get company's users list
     GET /api/companies/{company_id}/users
-* keyword (firstName, lastName, username, email)
-* order
-* limit
-* page
+*   keyword (firstName, lastName, username, email)
+*   order
+*   limit
+*   page
 ###### Get company's user details
     GET /api/companies/{company_id}/users/{user_id}
 ###### Post company's user
     POST /api/companies/{company_id}/users
 ###### Delete company's user
     DELETE /api/companies/{company_id}/users
-
