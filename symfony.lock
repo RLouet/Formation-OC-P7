@@ -1,4 +1,7 @@
 {
+    "babdev/pagerfanta-bundle": {
+        "version": "v3.3.0"
+    },
     "composer/package-versions-deprecated": {
         "version": "1.11.99.2"
     },
@@ -118,6 +121,12 @@
     },
     "nikic/php-parser": {
         "version": "v4.12.0"
+    },
+    "pagerfanta/core": {
+        "version": "v3.3.0"
+    },
+    "pagerfanta/doctrine-orm-adapter": {
+        "version": "v3.3.0"
     },
     "phpstan/phpdoc-parser": {
         "version": "0.5.5"
