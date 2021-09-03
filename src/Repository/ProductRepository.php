@@ -30,7 +30,7 @@ class ProductRepository extends AbstractRepository
         if ($term) {
             $qb
                 ->where('p.name LIKE :term OR p.brand LIKE :term')
-                ->setParameter('term', $term)
+                ->setParameter('term', "%" . $term . "%")
                 ;
         }
 

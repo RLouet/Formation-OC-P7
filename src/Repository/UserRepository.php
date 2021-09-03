@@ -38,7 +38,7 @@ class UserRepository extends AbstractRepository
         if ($term) {
             $qb
                 ->andWhere('u.lastName LIKE :term OR u.firstName LIKE :term OR u.username LIKE :term OR u.email LIKE :term')
-                ->setParameter('term', $term)
+                ->setParameter('term', "%" . $term . "%")
             ;
         }
 
