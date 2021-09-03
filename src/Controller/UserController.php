@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\User;
+use App\Exception\RessourceValidationException;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -95,7 +96,7 @@ class UserController extends AbstractFOSRestController
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
-    public function getUserDetails(Company $company, User $user, UserRepository $userRepository)
+    public function getUserDetails(Company $company, User $user)
     {
         if ($user->getCompany() === $company) {
             return $user;
@@ -126,6 +127,8 @@ class UserController extends AbstractFOSRestController
     ]
     public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations)
     {
+        //throw new \Exception('une exception');
+
         $user
             ->setCompany($company)
             ->setRegistrationDate(new \DateTime())
@@ -134,7 +137,11 @@ class UserController extends AbstractFOSRestController
         ;
 
         if (count($violations)) {
-            return $this->view($violations, Response::HTTP_BAD_REQUEST);
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
         }
 
         $entityManager->persist($user);
