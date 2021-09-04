@@ -9,10 +9,36 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity("email")]
 #[UniqueEntity("username")]
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *         "app_user_show",
+ *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ * )
+ * @Hateoas\Relation(
+ *     "delete",
+ *     href = @Hateoas\Route(
+ *         "app_user_delete",
+ *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ * )
+ * @Hateoas\Relation(
+ *     "company",
+ *     embedded = @Hateoas\Embedded("expr(object.getCompany())"),
+ *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ * )
+ */
 class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     use EntityIdManagementTrait;
@@ -70,7 +96,6 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]
     #[ORM\JoinColumn(nullable: false)]
-    #[Serializer\Groups(["USER_DETAILS"])]
     private Company $company;
 
     public function getUsername(): ?string
