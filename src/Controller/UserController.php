@@ -52,7 +52,7 @@ class UserController extends AbstractFOSRestController
      *     description="The pagination page."
      * )
      * @Rest\View(
-     *     serializerGroups = {"USER_LIST"}
+     *     serializerGroups = {"user_list"}
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
@@ -91,7 +91,7 @@ class UserController extends AbstractFOSRestController
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
      * @Rest\View(
-     *     serializerGroups = {"USER_LIST", "USER_DETAILS"}
+     *     serializerGroups = {"user_list", "user_details"}
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
@@ -112,7 +112,7 @@ class UserController extends AbstractFOSRestController
      * )
      * @Rest\View(
      *     StatusCode = 201,
-     *     serializerGroups = {"USER_LIST", "USER_DETAILS"}
+     *     serializerGroups = {"user_list", "user_details"}
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
@@ -120,7 +120,7 @@ class UserController extends AbstractFOSRestController
         "user",
         options: [
             'deserializationContext' => [
-                'groups' => ['USER_CREATE']
+                'groups' => ['user_create']
             ]
         ],
         converter: "fos_rest.request_body")

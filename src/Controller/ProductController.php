@@ -56,7 +56,7 @@ class ProductController extends AbstractFOSRestController
      *     description="The pagination page."
      * )
      * @Rest\View(
-     *     serializerGroups = {"PRODUCT_LIST"}
+     *     serializerGroups = {"products_list"}
      * )
      */
     public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository)

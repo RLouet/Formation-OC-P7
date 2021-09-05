@@ -22,7 +22,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
  * )
  * @Hateoas\Relation(
  *     "delete",
@@ -31,12 +31,12 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
  * )
  * @Hateoas\Relation(
  *     "company",
  *     embedded = @Hateoas\Embedded("expr(object.getCompany())"),
- *     exclusion = @Hateoas\Exclusion(groups = {"USER_DETAILS"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
  * )
  */
 class User implements PasswordAuthenticatedUserInterface, UserInterface
@@ -44,7 +44,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
+    #[Serializer\Groups(["user_list", "user_create"])]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
         message: "Between 5 and 128 letters and numbers only."
@@ -52,12 +52,12 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
+    #[Serializer\Groups(["user_list", "user_create"])]
     #[Assert\Email]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["USER_CREATE"])]
+    #[Serializer\Groups(["user_create"])]
     #[Assert\Length(
         min: 8,
         max: 128
@@ -65,7 +65,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $password;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
+    #[Serializer\Groups(["user_list", "user_create"])]
     #[Assert\Length(
         min: 2,
         max: 255
@@ -76,7 +76,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["USER_LIST", "USER_CREATE"])]
+    #[Serializer\Groups(["user_list", "user_create"])]
     #[Assert\Length(
         min: 2,
         max: 255
@@ -87,11 +87,11 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $firstName;
 
     #[ORM\Column(type: "datetime")]
-    #[Serializer\Groups(["USER_DETAILS"])]
+    #[Serializer\Groups(["user_details"])]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
-    #[Serializer\Groups(["USER_LIST"])]
+    #[Serializer\Groups(["user_list"])]
     private array $roles = [];
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]
