@@ -45,6 +45,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
     #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
         message: "Between 5 and 128 letters and numbers only."
@@ -53,11 +54,13 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
     #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Since("1.0")]
     #[Assert\Email]
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["user_create"])]
+    #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 8,
         max: 128
@@ -66,6 +69,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
         max: 255
@@ -77,6 +81,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
         max: 255
@@ -88,10 +93,12 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     #[ORM\Column(type: "datetime")]
     #[Serializer\Groups(["user_details"])]
+    #[Serializer\Since("1.0")]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
     #[Serializer\Groups(["user_list"])]
+    #[Serializer\Since("1.0")]
     private array $roles = [];
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]

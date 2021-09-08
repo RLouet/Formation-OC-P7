@@ -18,6 +18,7 @@ class Company
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
     #[Serializer\Groups(["user_details"])]
+    #[Serializer\Since("1.0")]
     private string $name;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
