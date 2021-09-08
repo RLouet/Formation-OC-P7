@@ -5,26 +5,40 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Hateoas\Configuration\Annotation as Hateoas;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
+#[UniqueEntity("reference")]
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *         "app_product_show",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list"})
+ * )
+ */
 class Product
 {
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 255, unique: true)]
-    #[Serializer\Groups(["PRODUCT_LIST"])]
+    #[Serializer\Groups(["products_list"])]
     private string $reference;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["PRODUCT_LIST"])]
+    #[Serializer\Groups(["products_list"])]
     private string $brand;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["PRODUCT_LIST"])]
+    #[Serializer\Groups(["products_list"])]
     private string $name;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["PRODUCT_LIST"])]
+    #[Serializer\Groups(["products_list"])]
     private string $color;
 
     #[ORM\Column(type: "text")]

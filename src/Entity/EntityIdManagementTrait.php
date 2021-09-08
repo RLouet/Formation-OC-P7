@@ -10,7 +10,7 @@ trait EntityIdManagementTrait
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: "integer")]
-    #[Serializer\Groups(["PRODUCT_LIST", "USER_LIST"])]
+    #[Serializer\Groups(["products_list", "user_list"])]
     private int $id;
 
     public function getId(): ?int
