@@ -27,27 +27,34 @@ class Product
 
     #[ORM\Column(type: "string", length: 255, unique: true)]
     #[Serializer\Groups(["products_list"])]
+    #[Serializer\Since("1.0")]
     private string $reference;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["products_list"])]
+    #[Serializer\Since("1.0")]
     private string $brand;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["products_list"])]
+    #[Serializer\Since("1.0")]
     private string $name;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["products_list"])]
+    #[Serializer\Since("1.0")]
     private string $color;
 
     #[ORM\Column(type: "text")]
+    #[Serializer\Since("1.0")]
     private string $description;
 
     #[ORM\Column(type: "float")]
+    #[Serializer\Since("1.0")]
     private float $size;
 
     #[ORM\Column(type: "float")]
+    #[Serializer\Since("1.0")]
     private float $price;
 
     public function getReference(): ?string
