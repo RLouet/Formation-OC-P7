@@ -11,7 +11,10 @@ use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
@@ -58,9 +61,9 @@ class UserController extends AbstractFOSRestController
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher)
     {
-        //dd($company);
-        /*$users = $userRepository->findBy(['company' => $company], ['lastName' => 'ASC', 'firstName' => 'ASC']);
-        return $users;*/
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
 
         $pager = $userRepository->search(
             $company,
@@ -98,10 +101,13 @@ class UserController extends AbstractFOSRestController
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
     public function getUserDetails(Company $company, User $user)
     {
-        if ($user->getCompany() === $company) {
-            return $user;
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
         }
-        return null;
+        if ($user->getCompany() !== $company) {
+            throw new BadRequestHttpException("Not found");
+        }
+        return $user;
     }
 
     /**
@@ -127,7 +133,9 @@ class UserController extends AbstractFOSRestController
     ]
     public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations)
     {
-        //throw new \Exception('une exception');
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
 
         $user
             ->setCompany($company)
@@ -165,11 +173,14 @@ class UserController extends AbstractFOSRestController
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
     public function deleteUser(Company $company, User $user, EntityManagerInterface $manager)
     {
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
         if ($user->getCompany() === $company) {
             $manager->remove($user);
             $manager->flush();
             return null;
         }
-        return $this->view("Invalid User", Response::HTTP_BAD_REQUEST);
+        throw new BadRequestHttpException("Invalid User");
     }
 }
