@@ -32,8 +32,16 @@ Vous pouvez voir la démo du projet [ici](https://snowtricks.romainlouet.fr/)
 ##### Création des données
     php bin/console doctrine:fixtures:load
 #### Utilisation
-contact@bilemo.com
-admin
+    contact@bilemo.com
+    Admin
+    admin
+
+    phonekingsuser1@phonekings.com
+    PhoneKingsUser1
+    user
+
+##### Creer token
+POST "username":{username}, "password":{password}
 ##### Routes
 ###### Get products list
     GET /api/products
