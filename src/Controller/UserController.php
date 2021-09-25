@@ -18,6 +18,8 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Rest\Route("/api")
@@ -99,7 +101,7 @@ class UserController extends AbstractFOSRestController
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
-    public function getUserDetails(Company $company, User $user)
+    public function getUserDetails(Company $company, User $user, CacheInterface $cache)
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -107,7 +109,13 @@ class UserController extends AbstractFOSRestController
         if ($user->getCompany() !== $company) {
             throw new BadRequestHttpException("Not found");
         }
-        return $user;
+        return $cache->get(
+            'user-' . $user->getId(),
+            function (ItemInterface $item) use ($user) {
+                $item->expiresAfter(3600);
+                return $user;
+            }
+        );
     }
 
     /**
