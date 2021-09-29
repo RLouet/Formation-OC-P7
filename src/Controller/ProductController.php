@@ -9,6 +9,9 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
 
 /**
  * @Rest\Route("/api")
@@ -16,12 +19,37 @@ use Symfony\Contracts\Cache\ItemInterface;
 class ProductController extends AbstractFOSRestController
 {
     /**
+     * Détails d'un produit.
      * @Rest\Get(
      *     path = "/products/{id}",
      *     name = "app_product_show",
      *     requirements = {"id"="\d+"}
      * )
      * @Rest\View()
+     * @OA\Get (
+     *     description="Détails d'un produit",
+     *     tags={"Product"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès -> Détails du produit",
+     *         @Model(type=Product::class),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Le produit n'a pas été trouvé."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentification écessaire."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer"),
+     *          in="path",
+     *          description="ID du produit."
+     *     )
+     * )
      */
     public function getProductDetails(Product $product, CacheInterface $cache)
     {
