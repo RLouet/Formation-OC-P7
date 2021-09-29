@@ -61,32 +61,36 @@ class UserController extends AbstractFOSRestController
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher)
+    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache)
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
         }
+        return $cache->get(
+            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            function (ItemInterface $item) use ($paramFetcher, $userRepository, $company) {
+                $item->expiresAfter(3600);
 
-        $pager = $userRepository->search(
-            $company,
-            $paramFetcher->get("keyword"),
-            $paramFetcher->get("order"),
-            $paramFetcher->get("limit"),
-            $paramFetcher->get("page")
+                $pager = $userRepository->search(
+                    $company,
+                    $paramFetcher->get("keyword"),
+                    $paramFetcher->get("order"),
+                    $paramFetcher->get("limit"),
+                    $paramFetcher->get("page")
+                );
+
+                return [
+                    "data" => $pager->getCurrentPageResults(),
+                    "meta" => [
+                        "limit" => $paramFetcher->get("limit"),
+                        "current items" => count($pager->getCurrentPageResults()),
+                        "total items" => $pager->getNbResults(),
+                        "current page" => $pager->getCurrentPage(),
+                        "total pages" => $pager->getNbPages()
+                    ]
+                ];
+            }
         );
-
-        $response = [
-            "data" => $pager->getCurrentPageResults(),
-            "meta" => [
-                "limit" => $paramFetcher->get("limit"),
-                "current items" => count($pager->getCurrentPageResults()),
-                "total items" => $pager->getNbResults(),
-                "current page" => $pager->getCurrentPage(),
-                "total pages" => $pager->getNbPages()
-            ]
-        ];
-
-        return $response;
     }
 
     /**
@@ -101,7 +105,7 @@ class UserController extends AbstractFOSRestController
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
-    public function getUserDetails(Company $company, User $user, CacheInterface $cache)
+    public function getUserDetails(Company $company, User $user)
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -109,13 +113,7 @@ class UserController extends AbstractFOSRestController
         if ($user->getCompany() !== $company) {
             throw new BadRequestHttpException("Not found");
         }
-        return $cache->get(
-            'user-' . $user->getId(),
-            function (ItemInterface $item) use ($user) {
-                $item->expiresAfter(3600);
-                return $user;
-            }
-        );
+        return $user;
     }
 
     /**

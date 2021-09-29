@@ -7,6 +7,8 @@ use App\Repository\ProductRepository;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @Rest\Route("/api")
@@ -21,9 +23,15 @@ class ProductController extends AbstractFOSRestController
      * )
      * @Rest\View()
      */
-    public function getProductDetails(Product $product)
+    public function getProductDetails(Product $product, CacheInterface $cache)
     {
-        return $product;
+        return $cache->get(
+            'product-' . $product->getId(),
+            function (ItemInterface $item) use ($product) {
+                $item->expiresAfter(3600);
+                return $product;
+            }
+        );
     }
 
     /**
@@ -59,28 +67,32 @@ class ProductController extends AbstractFOSRestController
      *     serializerGroups = {"products_list"}
      * )
      */
-    public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository)
+    public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache)
     {
-        /*$products = $productRepository->findBy([], ['brand' => 'ASC', 'name' => 'ASC']);
-        return $products;*/
-        $pager = $productRepository->search(
-            $paramFetcher->get("keyword"),
-            $paramFetcher->get("order"),
-            $paramFetcher->get("limit"),
-            $paramFetcher->get("page")
+
+        return $cache->get(
+            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            function (ItemInterface $item) use ($paramFetcher, $productRepository) {
+                $item->expiresAfter(3600);
+
+                $pager = $productRepository->search(
+                    $paramFetcher->get("keyword"),
+                    $paramFetcher->get("order"),
+                    $paramFetcher->get("limit"),
+                    $paramFetcher->get("page")
+                );
+
+                return [
+                    "data" => $pager->getCurrentPageResults(),
+                    "meta" => [
+                        "limit" => $paramFetcher->get("limit"),
+                        "current items" => count($pager->getCurrentPageResults()),
+                        "total items" => $pager->getNbResults(),
+                        "current page" => $pager->getCurrentPage(),
+                        "total pages" => $pager->getNbPages()
+                    ]
+                ];
+            }
         );
-
-        $response = [
-            "data" => $pager->getCurrentPageResults(),
-            "meta" => [
-                "limit" => $paramFetcher->get("limit"),
-                "current items" => count($pager->getCurrentPageResults()),
-                "total items" => $pager->getNbResults(),
-                "current page" => $pager->getCurrentPage(),
-                "total pages" => $pager->getNbPages()
-                ]
-            ];
-
-        return $response;
     }
 }
