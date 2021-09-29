@@ -25,13 +25,7 @@ class ProductController extends AbstractFOSRestController
      */
     public function getProductDetails(Product $product, CacheInterface $cache)
     {
-        return $cache->get(
-            'product-' . $product->getId(),
-            function (ItemInterface $item) use ($product) {
-                $item->expiresAfter(3600);
-                return $product;
-            }
-        );
+        return $product;
     }
 
     /**
