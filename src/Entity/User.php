@@ -122,6 +122,11 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         return $this->email;
     }
 
+    public function getUserIdentifier(): ?string
+    {
+        return $this->username;
+    }
+
     public function setEmail(string $email): self
     {
         $this->email = $email;
