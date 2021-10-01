@@ -159,7 +159,7 @@ class ProductController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function getProductDetails(Product $product, CacheInterface $cache)
+    public function getProductDetails(Product $product): Product
     {
         return $product;
     }

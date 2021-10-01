@@ -3,7 +3,6 @@
 namespace App\Exception;
 
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Throwable;
 
 class RessourceValidationException extends HttpException
 {

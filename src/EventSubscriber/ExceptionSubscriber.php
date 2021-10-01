@@ -11,7 +11,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class ExceptionSubscriber implements EventSubscriberInterface
 {
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             KernelEvents::EXCEPTION => [
@@ -33,7 +33,6 @@ class ExceptionSubscriber implements EventSubscriberInterface
         if ($exception instanceof RessourceValidationException) {
             $response['errors'] = $exception->getErrors();
         }
-        //dd($exception->getMessage(), $statusCode);
         $body = new JsonResponse($response, $statusCode);
         $event->setResponse($body) ;
     }

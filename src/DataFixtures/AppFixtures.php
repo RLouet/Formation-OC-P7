@@ -32,13 +32,8 @@ class AppFixtures extends Fixture
         for ($i = 0; $i < 25; $i++) {
             $product = new Product();
             $product->setBrand($faker->randomElement($brands));
-            $reference = "";
-            for ($rl = 0; $rl < 5; $rl++) {
-                $reference .= $faker->randomLetter;
-            }
-            for ($rd = 0; $rd < 5; $rd++) {
-                $reference .= $faker->randomDigit;
-            }
+            $reference = str_repeat($faker->randomLetter, 5);
+            $reference .= str_repeat($faker->randomDigit, 5);
             $product->setReference($reference);
             $product->setName($faker->word);
             $product->setColor($faker->colorName);
