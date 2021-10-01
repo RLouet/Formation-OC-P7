@@ -45,7 +45,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["user_list", "user_create", "user_login"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
@@ -96,7 +96,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $firstName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_create"])]
+    #[Serializer\Groups(["user_create", "user_login"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 8,

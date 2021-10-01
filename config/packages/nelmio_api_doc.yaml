@@ -5,10 +5,12 @@ nelmio_api_doc:
             description: The API dedicated to BileMo products !
             version: 1.0.0
         tags:
-            - name: "Users"
-              description: "Manage Users"
+            - name: "Authentication"
+              description: "User Login"
             - name: "Products"
               description: "Manage Products"
+            - name: "Users"
+              description: "Manage Users"
         components:
             securitySchemes:
                 Bearer:
