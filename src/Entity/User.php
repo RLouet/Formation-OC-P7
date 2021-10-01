@@ -23,7 +23,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "user_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list"})
  * )
  * @Hateoas\Relation(
  *     "delete",
@@ -45,7 +45,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_list", "user_create", "user_login"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_login"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
@@ -57,7 +57,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Email]
     /**
@@ -66,7 +66,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -81,7 +81,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -113,7 +113,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
-    #[Serializer\Groups(["user_list"])]
+    #[Serializer\Groups(["users_list"])]
     #[Serializer\Since("1.0")]
     private array $roles = [];
 

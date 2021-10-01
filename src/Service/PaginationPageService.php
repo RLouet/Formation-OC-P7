@@ -4,22 +4,26 @@ namespace App\Service;
 
 
 use App\Entity\PaginationPage;
+use JMS\Serializer\SerializationContext;
+use JMS\Serializer\SerializerInterface;
 use Pagerfanta\Pagerfanta;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class PaginationPageService
 {
     private UrlGeneratorInterface $urlGenerator;
+    private SerializerInterface $serializer;
     private string $route;
     private array $parameters;
     private Pagerfanta $pager;
 
-    public function __construct(UrlGeneratorInterface $urlGenerator)
+    public function __construct(UrlGeneratorInterface $urlGenerator, SerializerInterface $serializer)
     {
         $this->urlGenerator = $urlGenerator;
+        $this->serializer = $serializer;
     }
 
-    public function generatePage(string $route, array $parameters, Pagerfanta $pager): PaginationPage
+    public function generatePage(string $route, array $parameters, Pagerfanta $pager, string $type): string
     {
         $this->parameters = $parameters;
         $this->pager = $pager;
@@ -27,7 +31,19 @@ class PaginationPageService
         $page = new PaginationPage($route, $parameters, $pager);
         $page->setPreviousPage($this->generateUrl("previous"));
         $page->setNextPage($this->generateUrl("next"));
-        return $page;
+
+        $data = $pager->getCurrentPageResults();
+
+        $result = [
+            "_page" => $page,
+            "products" => $data
+        ];
+
+        return $this->serializer->serialize(
+            $result,
+            'json',
+            SerializationContext::create()->setGroups([$type . "_list"])
+        );
     }
 
     private function generateUrl(?string $page): string

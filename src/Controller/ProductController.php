@@ -9,7 +9,9 @@ use App\Service\PaginationPageService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use OpenApi\Annotations as OA;
@@ -49,9 +51,6 @@ class ProductController extends AbstractFOSRestController
      *     requirements="\d+",
      *     default="1",
      *     description="The pagination page."
-     * )
-     * @Rest\View(
-     *     serializerGroups = {"products_list"}
      * )
      * @OA\Get (
      *     description="Products list",
@@ -104,8 +103,8 @@ class ProductController extends AbstractFOSRestController
      */
     public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
     {
-        return $cache->get(
-            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+        $response = $cache->get(
+            'products-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
             function (ItemInterface $item) use ($paramFetcher, $productRepository, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
@@ -116,14 +115,11 @@ class ProductController extends AbstractFOSRestController
                     $paramFetcher->get("page")
                 );
 
-                $page = $paginationPageService->generatePage($request->get("_route"), $paramFetcher->all(), $pager);
-
-                return [
-                    "_page" => $page,
-                    "products" => $pager->getCurrentPageResults()
-                ];
+                return $paginationPageService->generatePage($request->get("_route"), $paramFetcher->all(), $pager, "products");
             }
         );
+
+        return new Response($response);
     }
 
     /**
