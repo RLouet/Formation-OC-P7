@@ -155,7 +155,7 @@ class ProductController extends AbstractFOSRestController
      *          required= true,
      *          @OA\Schema(type="integer"),
      *          in="path",
-     *          description="ID du produit."
+     *          description="Product's ID."
      *     )
      * )
      */

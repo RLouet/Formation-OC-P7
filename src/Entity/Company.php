@@ -8,38 +8,66 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
 #[UniqueEntity("name")]
 #[UniqueEntity("email")]
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *         "app_company_show",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "company_details"})
+ * )
+ * @Hateoas\Relation(
+ *     "users",
+ *     href = @Hateoas\Route(
+ *         "app_users_list",
+ *         parameters = {"company_id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ */
 class Company
 {
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_details"])]
+    #[Serializer\Groups(["user_details", "company_details"])]
     #[Serializer\Since("1.0")]
     private string $name;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
+    #[Serializer\Groups(["company_details"])]
     private string $email;
 
     #[ORM\Column(type: "string", length: 32)]
+    #[Serializer\Groups(["company_details"])]
     private string $phone;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["company_details"])]
     private string $address;
 
     #[ORM\Column(type: "integer")]
+    #[Serializer\Groups(["company_details"])]
     private int $zip;
 
     #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["company_details"])]
     private string $city;
 
     #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["company_details"])]
     private string $country;
 
     #[ORM\Column(type: "datetime")]
+    #[Serializer\Groups(["company_details"])]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\OneToMany(
