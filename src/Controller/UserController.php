@@ -32,6 +32,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 class UserController extends AbstractFOSRestController
 {
     /**
+     * Company's Users list.
      * @Rest\Get(
      *     path = "/companies/{company_id}/users",
      *     name = "app_users_list",
@@ -120,7 +121,7 @@ class UserController extends AbstractFOSRestController
             throw new AccessDeniedHttpException("Access denied");
         }
         return $cache->get(
-            'product-lista-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
             function (ItemInterface $item) use ($paramFetcher, $userRepository, $company, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 

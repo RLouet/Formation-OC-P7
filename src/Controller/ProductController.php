@@ -21,7 +21,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 class ProductController extends AbstractFOSRestController
 {
     /**
-     * List of BileMo's products.
+     * BileMo's Products list.
      * @Rest\Get(
      *     path = "/products",
      *     name = "app_products_list"

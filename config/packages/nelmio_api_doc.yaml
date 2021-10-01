@@ -2,7 +2,7 @@ nelmio_api_doc:
     documentation:
         info:
             title: BileMo API
-            description: L'API dédiée aux produits BileMo !
+            description: The API dedicated to BileMo products !
             version: 1.0.0
         tags:
             - name: "Users"
