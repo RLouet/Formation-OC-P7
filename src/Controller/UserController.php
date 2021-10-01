@@ -78,7 +78,7 @@ class UserController extends AbstractFOSRestController
      *                 ref=@Model(type=PaginationPage::class, groups={"user_list"})
      *             ),
      *             @OA\Property(
-     *                 property="products",
+     *                 property="users",
      *                 type="array",
      *                 @OA\Items(
      *                 ref=@Model(type=User::class, groups={"user_list"}),
@@ -111,6 +111,13 @@ class UserController extends AbstractFOSRestController
      *              type="string",
      *              enum={"asc", "desc"}
      *          ),
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
      *     )
      * )
      */
@@ -140,13 +147,14 @@ class UserController extends AbstractFOSRestController
 
                 return [
                     "_page" => $page,
-                    "products" => $pager->getCurrentPageResults()
+                    "users" => $pager->getCurrentPageResults()
                 ];
             }
         );
     }
 
     /**
+     * User details.
      * @Rest\Get(
      *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_show",
@@ -154,6 +162,37 @@ class UserController extends AbstractFOSRestController
      * )
      * @Rest\View(
      *     serializerGroups = {"user_list", "user_details"}
+     * )
+     * @OA\Get (
+     *     description="User details",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès -> Détails du produit",
+     *         @Model(type=User::class,  groups={"user_list", "user_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Product not found."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\Parameter(
+     *          name="user_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="User's ID."
+     *     )
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
