@@ -21,45 +21,7 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 class ProductController extends AbstractFOSRestController
 {
     /**
-     * Détails d'un produit.
-     * @Rest\Get(
-     *     path = "/products/{id}",
-     *     name = "app_product_show",
-     *     requirements = {"id"="\d+"}
-     * )
-     * @Rest\View()
-     * @OA\Get (
-     *     description="Détails d'un produit",
-     *     tags={"Products"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Succès -> Détails du produit",
-     *         @Model(type=Product::class),
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Le produit n'a pas été trouvé."
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Authentification nécessaire."
-     *     ),
-     *     @OA\Parameter(
-     *          name="id",
-     *          required= true,
-     *          @OA\Schema(type="integer"),
-     *          in="path",
-     *          description="ID du produit."
-     *     )
-     * )
-     */
-    public function getProductDetails(Product $product, CacheInterface $cache)
-    {
-        return $product;
-    }
-
-    /**
-     * Liste des produits.
+     * List of BileMo's products.
      * @Rest\Get(
      *     path = "/products",
      *     name = "app_products_list"
@@ -92,11 +54,11 @@ class ProductController extends AbstractFOSRestController
      *     serializerGroups = {"products_list"}
      * )
      * @OA\Get (
-     *     description="Liste des produits",
+     *     description="Products list",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=200,
-     *         description="Succès -> Liste des produits",
+     *         description="Success -> Products list",
      *         @OA\JsonContent(
      *             type= "object",
      *             @OA\Property(
@@ -114,11 +76,11 @@ class ProductController extends AbstractFOSRestController
      *     ),
      *     @OA\Response(
      *         response="404",
-     *         description="Aucune donnée trouvée."
+     *         description="No data found."
      *     ),
      *     @OA\Response(
      *         response="401",
-     *         description="Authentification nécessaire."
+     *         description="Authentication required."
      *     ),
      *     @OA\Parameter(
      *          name="limit",
@@ -143,7 +105,7 @@ class ProductController extends AbstractFOSRestController
     public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
     {
         return $cache->get(
-            'product-listb-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
             function (ItemInterface $item) use ($paramFetcher, $productRepository, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
@@ -162,5 +124,43 @@ class ProductController extends AbstractFOSRestController
                 ];
             }
         );
+    }
+
+    /**
+     * Product details.
+     * @Rest\Get(
+     *     path = "/products/{id}",
+     *     name = "app_product_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @Rest\View()
+     * @OA\Get (
+     *     description="Product details",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès -> Détails du produit",
+     *         @Model(type=Product::class),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Product not found."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer"),
+     *          in="path",
+     *          description="ID du produit."
+     *     )
+     * )
+     */
+    public function getProductDetails(Product $product, CacheInterface $cache)
+    {
+        return $product;
     }
 }

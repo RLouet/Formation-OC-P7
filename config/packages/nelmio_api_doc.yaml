@@ -4,6 +4,11 @@ nelmio_api_doc:
             title: BileMo API
             description: L'API dédiée aux produits BileMo !
             version: 1.0.0
+        tags:
+            - name: "Users"
+              description: "Manage Users"
+            - name: "Products"
+              description: "Manage Products"
         components:
             securitySchemes:
                 Bearer:

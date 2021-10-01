@@ -4,14 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\User;
+use App\Entity\PaginationPage;
 use App\Exception\RessourceValidationException;
 use App\Repository\UserRepository;
+use App\Service\PaginationPageService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -20,6 +23,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 /**
  * @Rest\Route("/api")
@@ -59,16 +64,64 @@ class UserController extends AbstractFOSRestController
      * @Rest\View(
      *     serializerGroups = {"user_list"}
      * )
+     * @OA\Get (
+     *     description="Users list",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success -> List of users",
+     *         @OA\JsonContent(
+     *             type= "object",
+     *             @OA\Property(
+     *                 property="page",
+     *                 ref=@Model(type=PaginationPage::class, groups={"user_list"})
+     *             ),
+     *             @OA\Property(
+     *                 property="products",
+     *                 type="array",
+     *                 @OA\Items(
+     *                 ref=@Model(type=User::class, groups={"user_list"}),
+     *                 ),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="No data found."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Parameter(
+     *          name="limit",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="page",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="order",
+     *          in="query",
+     *          @OA\Schema(
+     *              type="string",
+     *              enum={"asc", "desc"}
+     *          ),
+     *     )
+     * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache)
+    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
         }
         return $cache->get(
-            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
-            function (ItemInterface $item) use ($paramFetcher, $userRepository, $company) {
+            'product-lista-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            function (ItemInterface $item) use ($paramFetcher, $userRepository, $company, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
                 $pager = $userRepository->search(
@@ -79,15 +132,14 @@ class UserController extends AbstractFOSRestController
                     $paramFetcher->get("page")
                 );
 
+                $parameters = $paramFetcher->all();
+                $parameters["company_id"] = $company->getId();
+
+                $page = $paginationPageService->generatePage($request->get("_route"), $parameters, $pager);
+
                 return [
-                    "data" => $pager->getCurrentPageResults(),
-                    "meta" => [
-                        "limit" => $paramFetcher->get("limit"),
-                        "current items" => count($pager->getCurrentPageResults()),
-                        "total items" => $pager->getNbResults(),
-                        "current page" => $pager->getCurrentPage(),
-                        "total pages" => $pager->getNbPages()
-                    ]
+                    "_page" => $page,
+                    "products" => $pager->getCurrentPageResults()
                 ];
             }
         );
@@ -105,7 +157,7 @@ class UserController extends AbstractFOSRestController
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
-    public function getUserDetails(Company $company, User $user)
+    public function getUserDetails(Company $company, User $user): User
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -137,7 +189,7 @@ class UserController extends AbstractFOSRestController
         ],
         converter: "fos_rest.request_body")
     ]
-    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations)
+    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations): View
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
