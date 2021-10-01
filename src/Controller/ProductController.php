@@ -3,15 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\Product;
+use App\Entity\PaginationPage;
 use App\Repository\ProductRepository;
+use App\Service\PaginationPageService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
 
 /**
  * @Rest\Route("/api")
@@ -28,7 +30,7 @@ class ProductController extends AbstractFOSRestController
      * @Rest\View()
      * @OA\Get (
      *     description="Détails d'un produit",
-     *     tags={"Product"},
+     *     tags={"Products"},
      *     @OA\Response(
      *         response=200,
      *         description="Succès -> Détails du produit",
@@ -40,7 +42,7 @@ class ProductController extends AbstractFOSRestController
      *     ),
      *     @OA\Response(
      *         response="401",
-     *         description="Authentification écessaire."
+     *         description="Authentification nécessaire."
      *     ),
      *     @OA\Parameter(
      *          name="id",
@@ -57,6 +59,7 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
+     * Liste des produits.
      * @Rest\Get(
      *     path = "/products",
      *     name = "app_products_list"
@@ -88,13 +91,60 @@ class ProductController extends AbstractFOSRestController
      * @Rest\View(
      *     serializerGroups = {"products_list"}
      * )
+     * @OA\Get (
+     *     description="Liste des produits",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Succès -> Liste des produits",
+     *         @OA\JsonContent(
+     *             type= "object",
+     *             @OA\Property(
+     *                 property="page",
+     *                 ref=@Model(type=PaginationPage::class, groups={"products_list"})
+     *             ),
+     *             @OA\Property(
+     *                 property="products",
+     *                 type="array",
+     *                 @OA\Items(
+     *                 ref=@Model(type=Product::class, groups={"products_list"}),
+     *                 ),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Aucune donnée trouvée."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentification nécessaire."
+     *     ),
+     *     @OA\Parameter(
+     *          name="limit",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="page",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="order",
+     *          in="query",
+     *          @OA\Schema(
+     *              type="string",
+     *              enum={"asc", "desc"}
+     *          ),
+     *     )
+     * )
      */
-    public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache)
+    public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
     {
-
         return $cache->get(
-            'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
-            function (ItemInterface $item) use ($paramFetcher, $productRepository) {
+            'product-listb-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            function (ItemInterface $item) use ($paramFetcher, $productRepository, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
                 $pager = $productRepository->search(
@@ -104,15 +154,11 @@ class ProductController extends AbstractFOSRestController
                     $paramFetcher->get("page")
                 );
 
+                $page = $paginationPageService->generatePage($request->get("_route"), $paramFetcher->all(), $pager);
+
                 return [
-                    "data" => $pager->getCurrentPageResults(),
-                    "meta" => [
-                        "limit" => $paramFetcher->get("limit"),
-                        "current items" => count($pager->getCurrentPageResults()),
-                        "total items" => $pager->getNbResults(),
-                        "current page" => $pager->getCurrentPage(),
-                        "total pages" => $pager->getNbPages()
-                    ]
+                    "_page" => $page,
+                    "products" => $pager->getCurrentPageResults()
                 ];
             }
         );
