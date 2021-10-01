@@ -12,6 +12,10 @@ security:
         class: App\Entity\User
         property: username
   firewalls:
+    api_doc:
+      pattern: ^/api/doc
+      security: false
+
     login:
       pattern: ^/api/login
       stateless: true

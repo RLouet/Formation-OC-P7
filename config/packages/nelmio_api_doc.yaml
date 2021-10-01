@@ -1,0 +1,24 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: BileMo API
+            description: The API dedicated to BileMo products !
+            version: 1.0.0
+        tags:
+            - name: "Authentication"
+              description: "User Login"
+            - name: "Products"
+              description: "Manage Products"
+            - name: "Users"
+              description: "Manage Users"
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

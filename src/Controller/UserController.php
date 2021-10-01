@@ -4,14 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\User;
+use App\Entity\PaginationPage;
 use App\Exception\RessourceValidationException;
 use App\Repository\UserRepository;
+use App\Service\PaginationPageService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -20,6 +23,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use OpenApi\Annotations as OA;
+use Nelmio\ApiDocBundle\Annotation\Model;
 
 /**
  * @Rest\Route("/api")
@@ -27,6 +32,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 class UserController extends AbstractFOSRestController
 {
     /**
+     * Company's Users list.
      * @Rest\Get(
      *     path = "/companies/{company_id}/users",
      *     name = "app_users_list",
@@ -59,16 +65,75 @@ class UserController extends AbstractFOSRestController
      * @Rest\View(
      *     serializerGroups = {"user_list"}
      * )
+     * @OA\Get (
+     *     description="Users list",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success -> List of users",
+     *         @OA\JsonContent(
+     *             type= "object",
+     *             @OA\Property(
+     *                 property="page",
+     *                 ref=@Model(type=PaginationPage::class, groups={"user_list"})
+     *             ),
+     *             @OA\Property(
+     *                 property="users",
+     *                 type="array",
+     *                 @OA\Items(
+     *                 ref=@Model(type=User::class, groups={"user_list"}),
+     *                 ),
+     *             ),
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="No data found."
+     *     ),
+     *     @OA\Parameter(
+     *          name="limit",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="page",
+     *          in="query",
+     *          @OA\Schema(type="integer > 0", minimum=1),
+     *     ),
+     *     @OA\Parameter(
+     *          name="order",
+     *          in="query",
+     *          @OA\Schema(
+     *              type="string",
+     *              enum={"asc", "desc"}
+     *          ),
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     )
+     * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache)
+    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
         }
         return $cache->get(
             'product-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
-            function (ItemInterface $item) use ($paramFetcher, $userRepository, $company) {
+            function (ItemInterface $item) use ($paramFetcher, $userRepository, $company, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
                 $pager = $userRepository->search(
@@ -79,21 +144,21 @@ class UserController extends AbstractFOSRestController
                     $paramFetcher->get("page")
                 );
 
+                $parameters = $paramFetcher->all();
+                $parameters["company_id"] = $company->getId();
+
+                $page = $paginationPageService->generatePage($request->get("_route"), $parameters, $pager);
+
                 return [
-                    "data" => $pager->getCurrentPageResults(),
-                    "meta" => [
-                        "limit" => $paramFetcher->get("limit"),
-                        "current items" => count($pager->getCurrentPageResults()),
-                        "total items" => $pager->getNbResults(),
-                        "current page" => $pager->getCurrentPage(),
-                        "total pages" => $pager->getNbPages()
-                    ]
+                    "_page" => $page,
+                    "users" => $pager->getCurrentPageResults()
                 ];
             }
         );
     }
 
     /**
+     * User details.
      * @Rest\Get(
      *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_show",
@@ -102,10 +167,45 @@ class UserController extends AbstractFOSRestController
      * @Rest\View(
      *     serializerGroups = {"user_list", "user_details"}
      * )
+     * @OA\Get (
+     *     description="User details",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success -> User details",
+     *         @Model(type=User::class,  groups={"user_list", "user_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="User not found."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\Parameter(
+     *          name="user_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="User's ID."
+     *     )
+     * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
     #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
-    public function getUserDetails(Company $company, User $user)
+    public function getUserDetails(Company $company, User $user): User
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -117,6 +217,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * Create a user.
      * @Rest\Post(
      *     path = "/companies/{company_id}/users",
      *     name = "app_user_create",
@@ -125,6 +226,43 @@ class UserController extends AbstractFOSRestController
      * @Rest\View(
      *     StatusCode = 201,
      *     serializerGroups = {"user_list", "user_details"}
+     * )
+     * @OA\Post (
+     *     description="Create a new User",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> User created",
+     *         @Model(type=User::class,  groups={"user_list", "user_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="User",
+     *          @Model(type=User::class,  groups={"user_create"}),
+     *     ),
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
@@ -137,7 +275,7 @@ class UserController extends AbstractFOSRestController
         ],
         converter: "fos_rest.request_body")
     ]
-    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations)
+    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations): View
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -173,6 +311,44 @@ class UserController extends AbstractFOSRestController
      *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_delete",
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
+     * )
+     * @OA\Delete (
+     *     description="Delete an User",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=204,
+     *         description="Success -> User deleted",
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid User."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\Parameter(
+     *          name="user_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="User's ID."
+     *     )
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
