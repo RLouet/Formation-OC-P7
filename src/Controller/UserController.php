@@ -87,12 +87,16 @@ class UserController extends AbstractFOSRestController
      *         ),
      *     ),
      *     @OA\Response(
-     *         response="404",
-     *         description="No data found."
-     *     ),
-     *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="No data found."
      *     ),
      *     @OA\Parameter(
      *          name="limit",
@@ -168,16 +172,20 @@ class UserController extends AbstractFOSRestController
      *     tags={"Users"},
      *     @OA\Response(
      *         response=200,
-     *         description="Succès -> Détails du produit",
+     *         description="Success -> User details",
      *         @Model(type=User::class,  groups={"user_list", "user_details"}),
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Product not found."
      *     ),
      *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="User not found."
      *     ),
      *     @OA\Parameter(
      *          name="company_id",
@@ -209,6 +217,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * Create a user.
      * @Rest\Post(
      *     path = "/companies/{company_id}/users",
      *     name = "app_user_create",
@@ -217,6 +226,43 @@ class UserController extends AbstractFOSRestController
      * @Rest\View(
      *     StatusCode = 201,
      *     serializerGroups = {"user_list", "user_details"}
+     * )
+     * @OA\Post (
+     *     description="Create a new User",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> User created",
+     *         @Model(type=User::class,  groups={"user_list", "user_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="User",
+     *          @Model(type=User::class,  groups={"user_create"}),
+     *     ),
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
@@ -265,6 +311,44 @@ class UserController extends AbstractFOSRestController
      *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_delete",
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
+     * )
+     * @OA\Delete (
+     *     description="Delete an User",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=204,
+     *         description="Success -> User deleted",
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid User."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\Parameter(
+     *          name="user_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="User's ID."
+     *     )
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]

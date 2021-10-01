@@ -139,7 +139,7 @@ class ProductController extends AbstractFOSRestController
      *     tags={"Products"},
      *     @OA\Response(
      *         response=200,
-     *         description="Succès -> Détails du produit",
+     *         description="Success -> Product details",
      *         @Model(type=Product::class),
      *     ),
      *     @OA\Response(

@@ -9,6 +9,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Annotations as OA;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -50,22 +51,19 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
         message: "Between 5 and 128 letters and numbers only."
     )]
+    /**
+     * @OA\Property(default="JeanBon")
+     */
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
     #[Serializer\Groups(["user_list", "user_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Email]
+    /**
+     * @OA\Property(default="jeanbon@example.com")
+     */
     private string $email;
-
-    #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_create"])]
-    #[Serializer\Since("1.0")]
-    #[Assert\Length(
-        min: 8,
-        max: 128
-    )]
-    private string $password;
 
     #[ORM\Column(type: "string", length: 255)]
     #[Serializer\Groups(["user_list", "user_create"])]
@@ -77,6 +75,9 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[Assert\Regex(
         pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
+    /**
+     * @OA\Property(default="Jean")
+     */
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
@@ -89,7 +90,22 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[Assert\Regex(
         pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
+    /**
+     * @OA\Property(default="Bon")
+     */
     private string $firstName;
+
+    #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["user_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 8,
+        max: 128
+    )]
+    /**
+     * @OA\Property(default="P@ssword!")
+     */
+    private string $password;
 
     #[ORM\Column(type: "datetime")]
     #[Serializer\Groups(["user_details"])]
