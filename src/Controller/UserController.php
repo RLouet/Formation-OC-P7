@@ -252,7 +252,7 @@ class UserController extends AbstractFOSRestController
      * )
      */
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
-    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService)
+    public function getUsersList(Company $company, UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService): Response
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -428,6 +428,7 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * Delete an User
      * @Rest\View(StatusCode = 204)
      * @Rest\Delete(
      *     path = "/companies/{company_id}/users/{user_id}",

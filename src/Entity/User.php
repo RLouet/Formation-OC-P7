@@ -37,7 +37,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * @Hateoas\Relation(
  *     "company",
  *     embedded = @Hateoas\Embedded("expr(object.getCompany())"),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list"})
  * )
  */
 class User implements PasswordAuthenticatedUserInterface, UserInterface

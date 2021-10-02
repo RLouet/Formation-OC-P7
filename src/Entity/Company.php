@@ -21,7 +21,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "company_details"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list", "company_details"})
  * )
  * @Hateoas\Relation(
  *     "users",

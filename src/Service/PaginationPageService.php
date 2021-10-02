@@ -36,7 +36,7 @@ class PaginationPageService
 
         $result = [
             "_page" => $page,
-            "products" => $data
+            $type => $data
         ];
 
         return $this->serializer->serialize(
@@ -57,7 +57,6 @@ class PaginationPageService
                 $link = $this->urlGenerator->generate($this->route, $targetParameters, UrlGeneratorInterface::ABSOLUTE_URL);
             } catch (\Exception) {
             }
-
         }
 
         if ($page === "next") {
@@ -66,7 +65,6 @@ class PaginationPageService
                 $link = $this->urlGenerator->generate($this->route, $targetParameters, UrlGeneratorInterface::ABSOLUTE_URL);
             } catch (\Exception) {
             }
-
         }
 
         return $link;
