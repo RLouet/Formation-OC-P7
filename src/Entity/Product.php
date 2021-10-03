@@ -14,6 +14,13 @@ use Hateoas\Configuration\Annotation as Hateoas;
 #[UniqueEntity("reference")]
 /**
  * @Hateoas\Relation(
+ *     "create",
+ *     href = @Hateoas\Route(
+ *         "app_product_create",
+ *         absolute = true
+ *     ),
+ * )
+ * @Hateoas\Relation(
  *     "self",
  *     href = @Hateoas\Route(
  *         "app_product_show",
@@ -21,6 +28,22 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         absolute = true
  *     ),
  *     exclusion = @Hateoas\Exclusion(groups = {"products_list"})
+ * )
+ * @Hateoas\Relation(
+ *     "update",
+ *     href = @Hateoas\Route(
+ *         "app_product_update",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ * )
+ * @Hateoas\Relation(
+ *     "delete",
+ *     href = @Hateoas\Route(
+ *         "app_product_delete",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
  * )
  */
 class Product
