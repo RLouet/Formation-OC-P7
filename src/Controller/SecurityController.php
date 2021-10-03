@@ -19,6 +19,7 @@ class SecurityController extends AbstractFOSRestController
  * @OA\Post (
  *     description="Generate Token",
  *     tags={"Authentication"},
+ *     security={},
  *     @OA\Response(
  *         response=200,
  *         description="Success -> Token",

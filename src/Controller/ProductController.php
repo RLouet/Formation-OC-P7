@@ -4,13 +4,20 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\PaginationPage;
+use App\Exception\RessourceValidationException;
 use App\Repository\ProductRepository;
 use App\Service\PaginationPageService;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use FOS\RestBundle\View\View;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use OpenApi\Annotations as OA;
@@ -157,5 +164,75 @@ class ProductController extends AbstractFOSRestController
     public function getProductDetails(Product $product): Product
     {
         return $product;
+    }
+
+    /**
+     * Create a product.
+     * @Rest\Post(
+     *     path = "/products",
+     *     name = "app_product_create",
+     * )
+     * @Rest\View(
+     *     StatusCode = 201
+     * )
+     * @OA\Post (
+     *     description="Create a new Product",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> Product created",
+     *         @Model(type=Product::class),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="Product",
+     *          @Model(type=Product::class,  groups={"product_create"}),
+     *     ),
+     * )
+     */
+    #[ParamConverter(
+        "product",
+        options: [
+            'deserializationContext' => [
+                'groups' => ['product_create']
+            ]
+        ],
+        converter: "fos_rest.request_body"
+    )]
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function createProduct(Product $product, ConstraintViolationList $violations, EntityManagerInterface $entityManager): View
+    {
+        if (count($violations)) {
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
+        }
+
+
+        $entityManager->persist($product);
+        $entityManager->flush();
+        return $this->view(
+            $product,
+            Response::HTTP_CREATED,
+            ['Location' => $this->generateUrl('app_product_show', ['id' => $product->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
+        );
     }
 }

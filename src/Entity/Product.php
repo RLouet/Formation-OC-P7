@@ -5,8 +5,10 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
-use Hateoas\Configuration\Annotation as Hateoas;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Annotations as OA;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[UniqueEntity("reference")]
@@ -25,36 +27,88 @@ class Product
 {
     use EntityIdManagementTrait;
 
-    #[ORM\Column(type: "string", length: 255, unique: true)]
-    #[Serializer\Groups(["products_list"])]
+    #[ORM\Column(type: "string", length: 32, unique: true)]
+    #[Serializer\Groups(["products_list", "product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-Z0-9-]{5,32}$/',
+        message: "Between 5 and 32 letters, numbers and - only."
+    )]
+    /**
+     * @OA\Property(default="a1b2c3d4")
+     */
     private string $reference;
 
-    #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["products_list"])]
+    #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["products_list", "product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    /**
+     * @OA\Property(default="Samsung")
+     */
     private string $brand;
 
-    #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["products_list"])]
+    #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["products_list", "product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    /**
+     * @OA\Property(default="Galaxy S123")
+     */
     private string $name;
 
-    #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["products_list"])]
+    #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["products_list", "product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    /**
+     * @OA\Property(default="Pink")
+     */
     private string $color;
 
     #[ORM\Column(type: "text")]
+    #[Serializer\Groups(["product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 10,
+        max: 10240
+    )]
+    /**
+     * @OA\Property(default="This is a great phone !!")
+     */
     private string $description;
 
     #[ORM\Column(type: "float")]
+    #[Serializer\Groups(["product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Type(
+        type: 'float',
+        message: 'float required.'
+    )]
+    /**
+     * @OA\Property(default="8.9")
+     */
     private float $size;
 
     #[ORM\Column(type: "float")]
+    #[Serializer\Groups(["product_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Type(
+        type: 'float',
+        message: 'float required.'
+    )]
+    /**
+     * @OA\Property(default="1234.99")
+     */
     private float $price;
 
     public function getReference(): ?string
