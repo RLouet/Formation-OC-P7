@@ -81,12 +81,16 @@ class ProductController extends AbstractFOSRestController
      *         ),
      *     ),
      *     @OA\Response(
-     *         response="404",
-     *         description="No data found."
-     *     ),
-     *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="No data found."
      *     ),
      *     @OA\Parameter(
      *          name="limit",
@@ -146,12 +150,16 @@ class ProductController extends AbstractFOSRestController
      *         @Model(type=Product::class),
      *     ),
      *     @OA\Response(
-     *         response="404",
-     *         description="Product not found."
-     *     ),
-     *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Product not found."
      *     ),
      *     @OA\Parameter(
      *          name="id",
@@ -238,7 +246,7 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * Delete a product
+     * Delete a product.
      * @Rest\View(StatusCode = 204)
      * @Rest\Delete(
      *     path = "/products/{id}",
@@ -283,5 +291,76 @@ class ProductController extends AbstractFOSRestController
             $manager->remove($product);
             $manager->flush();
             return null;
+    }
+
+    /**
+     * Edit a Product.
+     * @Rest\View(StatusCode = 200)
+     * @Rest\Put(
+     *     path = "/products/{id}",
+     *     name = "app_product_update",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @OA\Put (
+     *     description="Edit a Product",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> Product updated",
+     *         @Model(type=Product::class),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Product's ID."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="Product",
+     *          @Model(type=Product::class,  groups={"product_create"}),
+     *     ),
+     * )
+     */
+    #[ParamConverter(
+        "updatedProduct",
+        options: [
+            'deserializationContext' => [
+                'groups' => ['product_create']
+            ]
+        ],
+        converter: "fos_rest.request_body"
+    )]
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function editProduct(Product $product, Product $updatedProduct, ConstraintViolationList $violations, EntityManagerInterface $manager): Product
+    {
+        if (count($violations)) {
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
+        }
+
+        $product->update($updatedProduct);
+        $manager->flush();
+        return $product;
     }
 }
