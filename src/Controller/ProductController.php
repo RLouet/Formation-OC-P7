@@ -16,6 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -234,5 +235,53 @@ class ProductController extends AbstractFOSRestController
             Response::HTTP_CREATED,
             ['Location' => $this->generateUrl('app_product_show', ['id' => $product->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
         );
+    }
+
+    /**
+     * Delete a product
+     * @Rest\View(StatusCode = 204)
+     * @Rest\Delete(
+     *     path = "/products/{id}",
+     *     name = "app_product_delete",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @OA\Delete (
+     *     description="Delete a Product",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=204,
+     *         description="Success -> Product deleted",
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Product."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Product's ID."
+     *     )
+     * )
+     */
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function deleteProduct(Product $product, EntityManagerInterface $manager)
+    {
+            $manager->remove($product);
+            $manager->flush();
+            return null;
     }
 }
