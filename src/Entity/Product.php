@@ -11,7 +11,10 @@ use OpenApi\Annotations as OA;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-#[UniqueEntity("reference")]
+#[UniqueEntity(
+    fields: ["reference"],
+    groups: ["product_create", "product_edit"]
+)]
 /**
  * @Hateoas\Relation(
  *     "create",
@@ -57,6 +60,7 @@ class Product
         pattern: '/^[a-zA-Z0-9-]{5,32}$/',
         message: "Between 5 and 32 letters, numbers and - only."
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="a1b2c3d4")
      */
@@ -69,6 +73,7 @@ class Product
         min: 1,
         max: 128
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="Samsung")
      */
@@ -81,6 +86,7 @@ class Product
         min: 1,
         max: 128
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="Galaxy S123")
      */
@@ -93,6 +99,7 @@ class Product
         min: 1,
         max: 128
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="Pink")
      */
@@ -105,6 +112,7 @@ class Product
         min: 10,
         max: 10240
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="This is a great phone !!")
      */
@@ -117,6 +125,7 @@ class Product
         type: 'float',
         message: 'float required.'
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="8.9")
      */
@@ -129,6 +138,7 @@ class Product
         type: 'float',
         message: 'float required.'
     )]
+    #[Assert\NotBlank(groups: ["product_create"])]
     /**
      * @OA\Property(default="1234.99")
      */

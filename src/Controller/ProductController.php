@@ -218,6 +218,9 @@ class ProductController extends AbstractFOSRestController
     #[ParamConverter(
         "product",
         options: [
+            'validator' => [
+                'groups' => ['product_create', 'Default']
+            ],
             'deserializationContext' => [
                 'groups' => ['product_create']
             ]
@@ -342,6 +345,9 @@ class ProductController extends AbstractFOSRestController
     #[ParamConverter(
         "updatedProduct",
         options: [
+            'validator' => [
+                'groups' => ['product_edit', 'Default']
+            ],
             'deserializationContext' => [
                 'groups' => ['product_create']
             ]
