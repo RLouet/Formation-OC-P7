@@ -280,6 +280,98 @@ class UserController extends AbstractFOSRestController
     }
 
     /**
+     * Create a user.
+     * @Rest\Post(
+     *     path = "/companies/{company_id}/users",
+     *     name = "app_user_create",
+     *     requirements = {"company_id"="\d+"}
+     * )
+     * @Rest\View(
+     *     StatusCode = 201,
+     *     serializerGroups = {"users_list", "user_details"}
+     * )
+     * @OA\Post (
+     *     description="Create a new User",
+     *     tags={"Users"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> User created",
+     *         @Model(type=User::class,  groups={"users_list", "user_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\Parameter(
+     *          name="company_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="User",
+     *          @Model(type=User::class,  groups={"user_create"}),
+     *     ),
+     * )
+     */
+    #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
+    #[ParamConverter(
+        "user",
+        options: [
+            'validator' => [
+                'groups' => ['user_create', 'Default']
+            ],
+            'deserializationContext' => [
+                'groups' => ['user_create']
+            ]
+        ],
+        converter: "fos_rest.request_body")
+    ]
+    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations): View
+    {
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
+
+        $user
+            ->setCompany($company)
+            ->setRegistrationDate(new \DateTime())
+            ->setPassword($passwordHasher->hashPassword($user, $user->getPassword()))
+            ->setRoles(["ROLE_USER"])
+        ;
+
+        if (count($violations)) {
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
+        }
+
+        $entityManager->persist($user);
+        $entityManager->flush();
+        return $this->view(
+            $user,
+            Response::HTTP_CREATED,
+            ['Location' => $this->generateUrl('app_user_show', ['company_id' => $user->getCompany()->getId(), 'user_id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
+        );
+    }
+
+    /**
      * User details.
      * @Rest\Get(
      *     path = "/companies/{company_id}/users/{user_id}",
@@ -333,29 +425,26 @@ class UserController extends AbstractFOSRestController
             throw new AccessDeniedHttpException("Access denied");
         }
         if ($user->getCompany() !== $company) {
-            throw new BadRequestHttpException("Not found");
+            throw new NotFoundHttpException("Not found");
         }
         return $user;
     }
 
     /**
-     * Create a user.
-     * @Rest\Post(
-     *     path = "/companies/{company_id}/users",
-     *     name = "app_user_create",
-     *     requirements = {"company_id"="\d+"}
+     * Edit a User.
+     * @Rest\View(StatusCode = 200)
+     * @Rest\Put(
+     *     path = "/companies/{company_id}/users/{user_id}",
+     *     name = "app_user_update",
+     *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
-     * @Rest\View(
-     *     StatusCode = 201,
-     *     serializerGroups = {"users_list", "user_details"}
-     * )
-     * @OA\Post (
-     *     description="Create a new User",
+     * @OA\Put (
+     *     description="Edit a User",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=201,
-     *         description="Success -> User created",
-     *         @Model(type=User::class,  groups={"users_list", "user_details"}),
+     *         description="Success -> User updated",
+     *         @Model(type=User::class, groups={"users_list", "user_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -380,6 +469,13 @@ class UserController extends AbstractFOSRestController
      *          in="path",
      *          description="Company's ID."
      *     ),
+     *     @OA\Parameter(
+     *          name="user_id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="User's ID."
+     *     ),
      *     @OA\RequestBody(
      *          required= true,
      *          description="User",
@@ -387,28 +483,26 @@ class UserController extends AbstractFOSRestController
      *     ),
      * )
      */
+
     #[ParamConverter("company", options: ['mapping' => ['company_id' => 'id']])]
+    #[ParamConverter("user", options: ['mapping' => ['user_id' => 'id']])]
     #[ParamConverter(
-        "user",
+        "updatedUser",
         options: [
+            'validator' => [
+                'groups' => ['user_edit', 'Default']
+            ],
             'deserializationContext' => [
                 'groups' => ['user_create']
             ]
         ],
-        converter: "fos_rest.request_body")
-    ]
-    public function createUser(Company $company, User $user, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $entityManager, ConstraintViolationList $violations): View
+        converter: "fos_rest.request_body"
+    )]
+    public function editUser(User $user, Company $company, User $updatedUser, ConstraintViolationList $violations, EntityManagerInterface $manager, UserPasswordHasherInterface $passwordHasher): User
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
         }
-
-        $user
-            ->setCompany($company)
-            ->setRegistrationDate(new \DateTime())
-            ->setPassword($passwordHasher->hashPassword($user, $user->getPassword()))
-            ->setRoles(["ROLE_USER"])
-        ;
 
         if (count($violations)) {
             $exception = new RessourceValidationException();
@@ -418,13 +512,9 @@ class UserController extends AbstractFOSRestController
             throw $exception;
         }
 
-        $entityManager->persist($user);
-        $entityManager->flush();
-        return $this->view(
-            $user,
-            Response::HTTP_CREATED,
-            ['Location' => $this->generateUrl('app_user_show', ['company_id' => $user->getCompany()->getId(), 'user_id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
-        );
+        $user->update($updatedUser, $passwordHasher);
+        $manager->flush();
+        return $user;
     }
 
     /**
