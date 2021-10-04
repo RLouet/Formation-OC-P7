@@ -139,7 +139,7 @@ class CompanyController extends AbstractFOSRestController
      *     serializerGroups = {"company_details"}
      * )
      * @OA\Get (
-     *     description="Company details",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Company details",
      *     tags={"Companies"},
      *     @OA\Response(
      *         response=200,

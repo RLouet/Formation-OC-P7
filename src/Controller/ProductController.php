@@ -59,7 +59,7 @@ class ProductController extends AbstractFOSRestController
      *     description="The pagination page."
      * )
      * @OA\Get (
-     *     description="Products list",
+     *     description="<b>Resticted to Users and Admins</b><br>Products list",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=200,
@@ -141,7 +141,7 @@ class ProductController extends AbstractFOSRestController
      * )
      * @Rest\View()
      * @OA\Get (
-     *     description="Product details",
+     *     description="<b>Resticted to Users and Admins</b><br>Product details",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=200,
@@ -184,7 +184,7 @@ class ProductController extends AbstractFOSRestController
      *     StatusCode = 201
      * )
      * @OA\Post (
-     *     description="Create a new Product",
+     *     description="<b>Resticted to Admins</b><br>Create a new Product",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=201,
@@ -255,7 +255,7 @@ class ProductController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @OA\Delete (
-     *     description="Delete a Product",
+     *     description="<b>Resticted to Admins</b><br>Delete a Product",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=204,
@@ -303,7 +303,7 @@ class ProductController extends AbstractFOSRestController
      *     requirements = {"id"="\d+"}
      * )
      * @OA\Put (
-     *     description="Edit a Product",
+     *     description="<b>Resticted to Admins</b><br>Edit a Product",
      *     tags={"Products"},
      *     @OA\Response(
      *         response=201,

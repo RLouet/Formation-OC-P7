@@ -71,7 +71,7 @@ class UserController extends AbstractFOSRestController
      *     description="The users company id."
      * )
      * @OA\Get (
-     *     description="All Users list",
+     *     description="<b>Resticted to Admins</b><br>All Users list",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=200,
@@ -192,7 +192,7 @@ class UserController extends AbstractFOSRestController
      *     description="The pagination page."
      * )
      * @OA\Get (
-     *     description="Users list",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Companie's Users list",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=200,
@@ -291,7 +291,7 @@ class UserController extends AbstractFOSRestController
      *     serializerGroups = {"users_list", "user_details"}
      * )
      * @OA\Post (
-     *     description="Create a new User",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Create a new User",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=201,
@@ -382,7 +382,7 @@ class UserController extends AbstractFOSRestController
      *     serializerGroups = {"users_list", "user_details"}
      * )
      * @OA\Get (
-     *     description="User details",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>User details",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=200,
@@ -439,7 +439,7 @@ class UserController extends AbstractFOSRestController
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
      * @OA\Put (
-     *     description="Edit a User",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Edit a User",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=201,
@@ -526,7 +526,7 @@ class UserController extends AbstractFOSRestController
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
      * @OA\Delete (
-     *     description="Delete an User",
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Delete an User",
      *     tags={"Users"},
      *     @OA\Response(
      *         response=204,
