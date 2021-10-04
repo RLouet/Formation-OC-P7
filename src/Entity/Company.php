@@ -21,7 +21,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list", "company_details"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list", "company_details", "companies_list"})
  * )
  * @Hateoas\Relation(
  *     "users",
@@ -38,12 +38,12 @@ class Company
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_details", "company_details"])]
+    #[Serializer\Groups(["user_details", "company_details", "companies_list"])]
     #[Serializer\Since("1.0")]
     private string $name;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Groups(["company_details", "companies_list"])]
     private string $email;
 
     #[ORM\Column(type: "string", length: 32)]
@@ -63,7 +63,7 @@ class Company
     private string $city;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Groups(["company_details", "companies_list"])]
     private string $country;
 
     #[ORM\Column(type: "datetime")]

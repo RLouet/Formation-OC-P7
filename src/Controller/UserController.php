@@ -4,14 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Company;
 use App\Entity\User;
-use App\Entity\PaginationPage;
 use App\Exception\RessourceValidationException;
 use App\Repository\CompanyRepository;
 use App\Repository\UserRepository;
 use App\Service\PaginationPageService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -26,6 +24,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use App\Entity\PaginationPage;
+use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
 
@@ -56,7 +56,7 @@ class UserController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="\d+",
      *     default="20",
-     *     description="Max number of product per page."
+     *     description="Max number of user per page."
      * )
      * @Rest\QueryParam(
      *     name="page",
@@ -183,7 +183,7 @@ class UserController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="\d+",
      *     default="20",
-     *     description="Max number of product per page."
+     *     description="Max number of user per page."
      * )
      * @Rest\QueryParam(
      *     name="page",

@@ -3,8 +3,8 @@
 namespace App\Entity;
 
 use JMS\Serializer\Annotation as Serializer;
-use Hateoas\Configuration\Annotation as Hateoas;
 use Pagerfanta\Pagerfanta;
+use Hateoas\Configuration\Annotation as Hateoas;
 use OpenApi\Annotations as OA;
 
 /**
@@ -15,12 +15,12 @@ use OpenApi\Annotations as OA;
  *         parameters = "expr(object.getParameters('first'))",
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list", "companies_list"})
  * )
  * @Hateoas\Relation(
  *     "previous",
  *     href = "expr(object.getPreviousPage())",
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list", "companies_list"})
  * )
  * @Hateoas\Relation(
  *     "self",
@@ -29,12 +29,12 @@ use OpenApi\Annotations as OA;
  *         parameters = "expr(object.getParameters())",
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list", "companies_list"})
  * )
  * @Hateoas\Relation(
  *     "next",
  *     href = "expr(object.getNextPage())",
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list", "companies_list"})
  * )
  * @Hateoas\Relation(
  *     "last",
@@ -43,7 +43,7 @@ use OpenApi\Annotations as OA;
  *         parameters = "expr(object.getParameters('last'))",
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "users_list", "companies_list"})
  * )
  */
 class PaginationPage
@@ -57,35 +57,35 @@ class PaginationPage
     /**
      * @OA\Property(default=2)
      */
-    #[Serializer\Groups(["products_list", "users_list"])]
+    #[Serializer\Groups(["products_list", "users_list", "companies_list"])]
     #[Serializer\Since("1.0")]
     private int $number;
 
     /**
      * @OA\Property(default=5)
      */
-    #[Serializer\Groups(["products_list", "users_list"])]
+    #[Serializer\Groups(["products_list", "users_list", "companies_list"])]
     #[Serializer\Since("1.0")]
     private int $items;
 
     /**
      * @OA\Property(default=20)
      */
-    #[Serializer\Groups(["products_list", "users_list"])]
+    #[Serializer\Groups(["products_list", "users_list", "companies_list"])]
     #[Serializer\Since("1.0")]
     private int $limit;
 
     /**
      * @OA\Property(default=2)
      */
-    #[Serializer\Groups(["products_list", "users_list"])]
+    #[Serializer\Groups(["products_list", "users_list", "companies_list"])]
     #[Serializer\Since("1.0")]
     private int $totalPages;
 
     /**
      * @OA\Property(default=25)
      */
-    #[Serializer\Groups(["products_list", "users_list"])]
+    #[Serializer\Groups(["products_list", "users_list", "companies_list"])]
     #[Serializer\Since("1.0")]
     private int $totalItems;
 
