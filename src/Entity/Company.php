@@ -8,12 +8,26 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
-#[UniqueEntity("name")]
-#[UniqueEntity("email")]
+#[UniqueEntity(
+    fields: ["name"],
+    groups: ["company_create", "company_edit"]
+)]
+#[UniqueEntity(
+    fields: ["email"],
+    groups: ["company_create", "company_edit"]
+)]
 /**
+ * @Hateoas\Relation(
+ *     "create",
+ *     href = @Hateoas\Route(
+ *         "app_company_create",
+ *         absolute = true
+ *     ),
+ * )
  * @Hateoas\Relation(
  *     "self",
  *     href = @Hateoas\Route(
@@ -32,42 +46,86 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *     ),
  *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
  * )
+ * @Hateoas\Relation(
+ *     "users",
+ *     embedded = @Hateoas\Embedded("expr(object.getUsers())"),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
  */
 class Company
 {
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_details", "company_details", "companies_list"])]
+    #[Serializer\Groups(["user_details", "company_details", "companies_list", "company_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $name;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["company_details", "companies_list"])]
+    #[Serializer\Groups(["company_details", "companies_list", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Email]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $email;
 
     #[ORM\Column(type: "string", length: 32)]
-    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 6,
+        max: 32
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $phone;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 6,
+        max: 255
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $address;
 
-    #[ORM\Column(type: "integer")]
-    #[Serializer\Groups(["company_details"])]
-    private int $zip;
+    #[ORM\Column(type: "string")]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Regex(
+        pattern: '/^[0-9]{5}$/',
+        message: "5 numbers only."
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
+    private string $zip;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $city;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["company_details", "companies_list"])]
+    #[Serializer\Groups(["company_details", "companies_list", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $country;
 
     #[ORM\Column(type: "datetime")]
     #[Serializer\Groups(["company_details"])]
+    #[Serializer\Since("1.0")]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\OneToMany(
@@ -81,6 +139,7 @@ class Company
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->setRegistrationDate(new \DateTime());
     }
 
     public function getName(): ?string
@@ -131,12 +190,12 @@ class Company
         return $this;
     }
 
-    public function getZip(): ?int
+    public function getZip(): ?string
     {
         return $this->zip;
     }
 
-    public function setZip(int $zip): self
+    public function setZip(string $zip): self
     {
         $this->zip = $zip;
 

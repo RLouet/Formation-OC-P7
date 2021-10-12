@@ -3,14 +3,20 @@
 namespace App\Controller;
 
 use App\Entity\Company;
+use App\Exception\RessourceValidationException;
 use App\Repository\CompanyRepository;
 use App\Service\PaginationPageService;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Request\ParamFetcherInterface;
+use FOS\RestBundle\View\View;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use App\Entity\PaginationPage;
@@ -144,7 +150,7 @@ class CompanyController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=200,
      *         description="Success -> Company details",
-     *         @Model(type=Company::class),
+     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
      *     ),
      *     @OA\Response(
      *         response="404",
@@ -169,5 +175,80 @@ class CompanyController extends AbstractFOSRestController
             throw new AccessDeniedHttpException("Access denied");
         }
         return $company;
+    }
+
+    /**
+     * Create a company.
+     * @Rest\Post(
+     *     path = "/companies",
+     *     name = "app_company_create",
+     * )
+     * @Rest\View(
+     *     StatusCode = 201,
+     *     serializerGroups = {"companies_list", "company_details"}
+     * )
+     * @OA\Post (
+     *     description="<b>Resticted to Admins</b><br>Create a new Company",
+     *     tags={"Companies"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> Company created",
+     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="Company",
+     *          @Model(type=Company::class,  groups={"company_create"}),
+     *     ),
+     * )
+     */
+    #[ParamConverter(
+        "company",
+        options: [
+            'validator' => [
+                'groups' => ['company_create', 'Default']
+            ],
+            'deserializationContext' => [
+                'groups' => ['company_create']
+            ]
+        ],
+        converter: "fos_rest.request_body"
+    )]
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function createCompany(Company $company, ConstraintViolationList $violations, EntityManagerInterface $entityManager): View
+    {
+        if (count($violations)) {
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
+        }
+
+        $company->__construct();
+
+        $entityManager->persist($company);
+        $entityManager->flush();
+        return $this->view(
+            $company,
+            Response::HTTP_CREATED,
+            ['Location' => $this->generateUrl('app_company_show', ['id' => $company->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
+        );
     }
 }
