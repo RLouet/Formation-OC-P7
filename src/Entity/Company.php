@@ -27,6 +27,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         "app_company_create",
  *         absolute = true
  *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
  * )
  * @Hateoas\Relation(
  *     "self",
@@ -44,11 +45,6 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"company_id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
- * )
- * @Hateoas\Relation(
- *     "users",
- *     embedded = @Hateoas\Embedded("expr(object.getUsers())"),
  *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
  * )
  */
@@ -137,6 +133,11 @@ class Company
     private Collection $users;
 
     public function __construct()
+    {
+        $this->init();
+    }
+
+    public function init()
     {
         $this->users = new ArrayCollection();
         $this->setRegistrationDate(new \DateTime());

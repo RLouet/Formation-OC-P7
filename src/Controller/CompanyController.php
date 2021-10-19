@@ -185,7 +185,7 @@ class CompanyController extends AbstractFOSRestController
      * )
      * @Rest\View(
      *     StatusCode = 201,
-     *     serializerGroups = {"companies_list", "company_details"}
+     *     serializerGroups = {"companies_list", "company_create"}
      * )
      * @OA\Post (
      *     description="<b>Resticted to Admins</b><br>Create a new Company",
@@ -193,7 +193,7 @@ class CompanyController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=201,
      *         description="Success -> Company created",
-     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
+     *         @Model(type=Company::class, groups={"companies_list", "company_create"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -241,7 +241,7 @@ class CompanyController extends AbstractFOSRestController
             throw $exception;
         }
 
-        $company->__construct();
+        $company->init();
 
         $entityManager->persist($company);
         $entityManager->flush();
