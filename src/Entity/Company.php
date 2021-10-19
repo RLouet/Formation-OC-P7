@@ -45,7 +45,16 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details", "company_create"})
+ * )
+ * @Hateoas\Relation(
+ *     "delete",
+ *     href = @Hateoas\Route(
+ *         "app_company_delete",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details", "company_create"})
  * )
  * @Hateoas\Relation(
  *     "users",

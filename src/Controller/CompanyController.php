@@ -266,7 +266,7 @@ class CompanyController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=201,
      *         description="Success -> Company updated",
-     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
+     *         @Model(type=Company::class, groups={"companies_list", "company_create"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -310,7 +310,7 @@ class CompanyController extends AbstractFOSRestController
         ],
         converter: "fos_rest.request_body"
     )]
-    public function editProduct(Company $company, Company $updatedCompany, ConstraintViolationList $violations, EntityManagerInterface $manager): Company
+    public function editCompany(Company $company, Company $updatedCompany, ConstraintViolationList $violations, EntityManagerInterface $manager): Company
     {
         if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
             throw new AccessDeniedHttpException("Access denied");
@@ -327,5 +327,53 @@ class CompanyController extends AbstractFOSRestController
         $company->update($updatedCompany);
         $manager->flush();
         return $company;
+    }
+
+    /**
+     * Delete a Company
+     * @Rest\View(StatusCode = 204)
+     * @Rest\Delete(
+     *     path = "/companies/{id}",
+     *     name = "app_company_delete",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @OA\Delete (
+     *     description="<b>Resticted to Admins</b><br>Delete an Company",
+     *     tags={"Companies"},
+     *     @OA\Response(
+     *         response=204,
+     *         description="Success -> Company deleted",
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Company."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     )
+     * )
+     */
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function deleteUser(Company $company, EntityManagerInterface $manager)
+    {
+        $manager->remove($company);
+        $manager->flush();
+        return null;
     }
 }
