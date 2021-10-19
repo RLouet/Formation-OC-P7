@@ -39,6 +39,15 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list", "company_details", "companies_list"})
  * )
  * @Hateoas\Relation(
+ *     "update",
+ *     href = @Hateoas\Route(
+ *         "app_company_update",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ * @Hateoas\Relation(
  *     "users",
  *     href = @Hateoas\Route(
  *         "app_users_list",
@@ -145,7 +154,7 @@ class Company
 
     public function getName(): ?string
     {
-        return $this->name;
+        return $this->name ?? null;
     }
 
     public function setName(string $name): self
@@ -157,7 +166,7 @@ class Company
 
     public function getEmail(): ?string
     {
-        return $this->email;
+        return $this->email ?? null;
     }
 
     public function setEmail(string $email): self
@@ -169,7 +178,7 @@ class Company
 
     public function getPhone(): ?string
     {
-        return $this->phone;
+        return $this->phone ?? null;
     }
 
     public function setPhone(string $phone): self
@@ -181,7 +190,7 @@ class Company
 
     public function getAddress(): ?string
     {
-        return $this->address;
+        return $this->address ?? null;
     }
 
     public function setAddress(string $address): self
@@ -193,7 +202,7 @@ class Company
 
     public function getZip(): ?string
     {
-        return $this->zip;
+        return $this->zip ?? null;
     }
 
     public function setZip(string $zip): self
@@ -205,7 +214,7 @@ class Company
 
     public function getCity(): ?string
     {
-        return $this->city;
+        return $this->city ?? null;
     }
 
     public function setCity(string $city): self
@@ -217,7 +226,7 @@ class Company
 
     public function getCountry(): ?string
     {
-        return $this->country;
+        return $this->country ?? null;
     }
 
     public function setCountry(string $country): self
@@ -263,6 +272,32 @@ class Company
             }
         }
 
+        return $this;
+    }
+
+    public function update(Company $company): self
+    {
+        if ($company->getName()) {
+            $this->name = $company->getName();
+        }
+        if ($company->getEmail()) {
+            $this->email = $company->getEmail();
+        }
+        if ($company->getPhone()) {
+            $this->phone = $company->getPhone();
+        }
+        if ($company->getAddress()) {
+            $this->address = $company->getAddress();
+        }
+        if ($company->getZip()) {
+            $this->zip = $company->getZip();
+        }
+        if ($company->getCity()) {
+            $this->city = $company->getCity();
+        }
+        if ($company->getCountry()) {
+            $this->country = $company->getCountry();
+        }
         return $this;
     }
 }

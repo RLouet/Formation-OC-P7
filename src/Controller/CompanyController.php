@@ -251,4 +251,81 @@ class CompanyController extends AbstractFOSRestController
             ['Location' => $this->generateUrl('app_company_show', ['id' => $company->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
         );
     }
+
+    /**
+     * Edit a Company.
+     * @Rest\View(StatusCode = 200)
+     * @Rest\Put(
+     *     path = "/companies/{id}",
+     *     name = "app_company_update",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @OA\Put (
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Edit a Company",
+     *     tags={"Companies"},
+     *     @OA\Response(
+     *         response=201,
+     *         description="Success -> Company updated",
+     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Url."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Company's ID."
+     *     ),
+     *     @OA\RequestBody(
+     *          required= true,
+     *          description="Company",
+     *          @Model(type=Company::class,  groups={"company_create"}),
+     *     ),
+     * )
+     */
+    #[ParamConverter(
+        "updatedCompany",
+        options: [
+            'validator' => [
+                'groups' => ['company_edit', 'Default']
+            ],
+            'deserializationContext' => [
+                'groups' => ['company_create']
+            ]
+        ],
+        converter: "fos_rest.request_body"
+    )]
+    public function editProduct(Company $company, Company $updatedCompany, ConstraintViolationList $violations, EntityManagerInterface $manager): Company
+    {
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
+
+        if (count($violations)) {
+            $exception = new RessourceValidationException();
+            foreach ($violations as $violation) {
+                $exception->addError($violation->getPropertyPath(), $violation->getMessage());
+            }
+            throw $exception;
+        }
+
+        $company->update($updatedCompany);
+        $manager->flush();
+        return $company;
+    }
 }
