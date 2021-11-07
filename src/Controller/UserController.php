@@ -160,6 +160,7 @@ class UserController extends AbstractFOSRestController
 
         return new Response($response);
     }
+
     /**
      * Company's Users list.
      * @Rest\Get(
@@ -288,7 +289,7 @@ class UserController extends AbstractFOSRestController
      * )
      * @Rest\View(
      *     StatusCode = 201,
-     *     serializerGroups = {"users_list", "user_details"}
+     *     serializerGroups = {"user_details"}
      * )
      * @OA\Post (
      *     description="<b>Resticted to Companie's Users and Admins</b><br>Create a new User",
@@ -296,7 +297,7 @@ class UserController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=201,
      *         description="Success -> User created",
-     *         @Model(type=User::class,  groups={"users_list", "user_details"}),
+     *         @Model(type=User::class, groups={"user_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -379,7 +380,7 @@ class UserController extends AbstractFOSRestController
      *     requirements = {"company_id"="\d+", "user_id"="\d+"}
      * )
      * @Rest\View(
-     *     serializerGroups = {"users_list", "user_details"}
+     *     serializerGroups = {"user_details"}
      * )
      * @OA\Get (
      *     description="<b>Resticted to Companie's Users and Admins</b><br>User details",
@@ -387,7 +388,7 @@ class UserController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=200,
      *         description="Success -> User details",
-     *         @Model(type=User::class,  groups={"users_list", "user_details"}),
+     *         @Model(type=User::class,  groups={"user_details"}),
      *     ),
      *     @OA\Response(
      *         response="401",
@@ -432,7 +433,10 @@ class UserController extends AbstractFOSRestController
 
     /**
      * Edit a User.
-     * @Rest\View(StatusCode = 200)
+     * @Rest\View(
+     *     StatusCode = 200,
+     *     serializerGroups = {"user_details"}
+     *     )
      * @Rest\Put(
      *     path = "/companies/{company_id}/users/{user_id}",
      *     name = "app_user_update",
@@ -442,9 +446,9 @@ class UserController extends AbstractFOSRestController
      *     description="<b>Resticted to Companie's Users and Admins</b><br>Edit a User",
      *     tags={"Users"},
      *     @OA\Response(
-     *         response=201,
+     *         response=200,
      *         description="Success -> User updated",
-     *         @Model(type=User::class, groups={"users_list", "user_details"}),
+     *         @Model(type=User::class, groups={"user_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",

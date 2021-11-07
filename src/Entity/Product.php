@@ -22,6 +22,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         "app_product_create",
  *         absolute = true
  *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"product_details"})
  * )
  * @Hateoas\Relation(
  *     "self",
@@ -30,7 +31,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"products_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"products_list", "product_details"})
  * )
  * @Hateoas\Relation(
  *     "update",
@@ -39,6 +40,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"product_details"})
  * )
  * @Hateoas\Relation(
  *     "delete",
@@ -47,6 +49,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"product_details"})
  * )
  */
 class Product
@@ -54,7 +57,7 @@ class Product
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 32, unique: true)]
-    #[Serializer\Groups(["products_list", "product_create"])]
+    #[Serializer\Groups(["products_list", "product_details", "product_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9-]{5,32}$/',
@@ -67,7 +70,7 @@ class Product
     private string $reference;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["products_list", "product_create"])]
+    #[Serializer\Groups(["products_list", "product_details", "product_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 1,
@@ -80,7 +83,7 @@ class Product
     private string $brand;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["products_list", "product_create"])]
+    #[Serializer\Groups(["products_list", "product_details", "product_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 1,
@@ -93,7 +96,7 @@ class Product
     private string $name;
 
     #[ORM\Column(type: "string", length: 128)]
-    #[Serializer\Groups(["products_list", "product_create"])]
+    #[Serializer\Groups(["products_list", "product_details", "product_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 1,
@@ -106,7 +109,7 @@ class Product
     private string $color;
 
     #[ORM\Column(type: "text")]
-    #[Serializer\Groups(["product_create"])]
+    #[Serializer\Groups(["product_create", "product_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 10,
@@ -119,7 +122,7 @@ class Product
     private string $description;
 
     #[ORM\Column(type: "float")]
-    #[Serializer\Groups(["product_create"])]
+    #[Serializer\Groups(["product_create", "product_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Type(
         type: 'float',
@@ -132,7 +135,7 @@ class Product
     private float $size;
 
     #[ORM\Column(type: "float")]
-    #[Serializer\Groups(["product_create"])]
+    #[Serializer\Groups(["product_create", "product_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Type(
         type: 'float',

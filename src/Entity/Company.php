@@ -45,7 +45,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"company_details", "company_create"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
  * )
  * @Hateoas\Relation(
  *     "delete",
@@ -54,7 +54,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"company_details", "company_create"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
  * )
  * @Hateoas\Relation(
  *     "users",

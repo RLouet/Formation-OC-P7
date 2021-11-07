@@ -135,49 +135,6 @@ class CompanyController extends AbstractFOSRestController
     }
 
     /**
-     * Company details.
-     * @Rest\Get(
-     *     path = "/companies/{id}",
-     *     name = "app_company_show",
-     *     requirements = {"id"="\d+"}
-     * )
-     * @Rest\View(
-     *     serializerGroups = {"company_details"}
-     * )
-     * @OA\Get (
-     *     description="<b>Resticted to Companie's Users and Admins</b><br>Company details",
-     *     tags={"Companies"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success -> Company details",
-     *         @Model(type=Company::class, groups={"companies_list", "company_details"}),
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Company not found."
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Authentication required."
-     *     ),
-     *     @OA\Parameter(
-     *          name="id",
-     *          required= true,
-     *          @OA\Schema(type="integer"),
-     *          in="path",
-     *          description="Company's ID."
-     *     )
-     * )
-     */
-    public function getCompanyDetails(Company $company): Company
-    {
-        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
-            throw new AccessDeniedHttpException("Access denied");
-        }
-        return $company;
-    }
-
-    /**
      * Create a company.
      * @Rest\Post(
      *     path = "/companies",
@@ -185,7 +142,7 @@ class CompanyController extends AbstractFOSRestController
      * )
      * @Rest\View(
      *     StatusCode = 201,
-     *     serializerGroups = {"companies_list", "company_create"}
+     *     serializerGroups = {"company_details"}
      * )
      * @OA\Post (
      *     description="<b>Resticted to Admins</b><br>Create a new Company",
@@ -193,7 +150,7 @@ class CompanyController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=201,
      *         description="Success -> Company created",
-     *         @Model(type=Company::class, groups={"companies_list", "company_create"}),
+     *         @Model(type=Company::class, groups={"company_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -253,8 +210,54 @@ class CompanyController extends AbstractFOSRestController
     }
 
     /**
+     * Company details.
+     * @Rest\Get(
+     *     path = "/companies/{id}",
+     *     name = "app_company_show",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @Rest\View(
+     *     serializerGroups = {"company_details"}
+     * )
+     * @OA\Get (
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Company details",
+     *     tags={"Companies"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success -> Company details",
+     *         @Model(type=Company::class, groups={"company_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Company not found."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer"),
+     *          in="path",
+     *          description="Company's ID."
+     *     )
+     * )
+     */
+    public function getCompanyDetails(Company $company): Company
+    {
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
+        return $company;
+    }
+
+    /**
      * Edit a Company.
-     * @Rest\View(StatusCode = 200)
+     * @Rest\View(
+     *     StatusCode = 200,
+     *     serializerGroups = {"company_details"}
+     *     )
      * @Rest\Put(
      *     path = "/companies/{id}",
      *     name = "app_company_update",
@@ -264,9 +267,9 @@ class CompanyController extends AbstractFOSRestController
      *     description="<b>Resticted to Companie's Users and Admins</b><br>Edit a Company",
      *     tags={"Companies"},
      *     @OA\Response(
-     *         response=201,
+     *         response=200,
      *         description="Success -> Company updated",
-     *         @Model(type=Company::class, groups={"companies_list", "company_create"}),
+     *         @Model(type=Company::class, groups={"company_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",

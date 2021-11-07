@@ -70,7 +70,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["users_list", "user_create", "user_login"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details", "user_login"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
@@ -83,7 +83,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["users_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Email]
     #[Assert\NotBlank(groups: ["user_create"])]
@@ -93,7 +93,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["users_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -109,7 +109,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["users_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -143,7 +143,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
-    #[Serializer\Groups(["users_list"])]
+    #[Serializer\Groups(["users_list", "user_details"])]
     #[Serializer\Since("1.0")]
     private array $roles = [];
 

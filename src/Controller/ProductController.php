@@ -133,55 +133,14 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * Product details.
-     * @Rest\Get(
-     *     path = "/products/{id}",
-     *     name = "app_product_show",
-     *     requirements = {"id"="\d+"}
-     * )
-     * @Rest\View()
-     * @OA\Get (
-     *     description="<b>Resticted to Users and Admins</b><br>Product details",
-     *     tags={"Products"},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success -> Product details",
-     *         @Model(type=Product::class),
-     *     ),
-     *     @OA\Response(
-     *         response="401",
-     *         description="Authentication required."
-     *     ),
-     *     @OA\Response(
-     *         response="403",
-     *         description="Access denied."
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Product not found."
-     *     ),
-     *     @OA\Parameter(
-     *          name="id",
-     *          required= true,
-     *          @OA\Schema(type="integer"),
-     *          in="path",
-     *          description="Product's ID."
-     *     )
-     * )
-     */
-    public function getProductDetails(Product $product): Product
-    {
-        return $product;
-    }
-
-    /**
      * Create a product.
      * @Rest\Post(
      *     path = "/products",
      *     name = "app_product_create",
      * )
      * @Rest\View(
-     *     StatusCode = 201
+     *     StatusCode = 201,
+     *     serializerGroups = {"product_details"}
      * )
      * @OA\Post (
      *     description="<b>Resticted to Admins</b><br>Create a new Product",
@@ -189,7 +148,7 @@ class ProductController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=201,
      *         description="Success -> Product created",
-     *         @Model(type=Product::class),
+     *         @Model(type=Product::class, groups={"product_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -247,23 +206,22 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * Delete a product.
-     * @Rest\View(StatusCode = 204)
-     * @Rest\Delete(
+     * Product details.
+     * @Rest\Get(
      *     path = "/products/{id}",
-     *     name = "app_product_delete",
+     *     name = "app_product_show",
      *     requirements = {"id"="\d+"}
      * )
-     * @OA\Delete (
-     *     description="<b>Resticted to Admins</b><br>Delete a Product",
+     * @Rest\View(
+     *     serializerGroups = {"product_details"}
+     * )
+     * @OA\Get (
+     *     description="<b>Resticted to Users and Admins</b><br>Product details",
      *     tags={"Products"},
      *     @OA\Response(
-     *         response=204,
-     *         description="Success -> Product deleted",
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Bad request."
+     *         response=200,
+     *         description="Success -> Product details",
+     *         @Model(type=Product::class, groups={"product_details"}),
      *     ),
      *     @OA\Response(
      *         response="401",
@@ -275,28 +233,28 @@ class ProductController extends AbstractFOSRestController
      *     ),
      *     @OA\Response(
      *         response="404",
-     *         description="Invalid Product."
+     *         description="Product not found."
      *     ),
      *     @OA\Parameter(
      *          name="id",
      *          required= true,
-     *          @OA\Schema(type="integer", minimum=1),
+     *          @OA\Schema(type="integer"),
      *          in="path",
      *          description="Product's ID."
      *     )
      * )
      */
-    #[Security("is_granted('ROLE_ADMIN')")]
-    public function deleteProduct(Product $product, EntityManagerInterface $manager)
+    public function getProductDetails(Product $product): Product
     {
-            $manager->remove($product);
-            $manager->flush();
-            return null;
+        return $product;
     }
 
     /**
      * Edit a Product.
-     * @Rest\View(StatusCode = 200)
+     * @Rest\View(
+     *     StatusCode = 200,
+     *     serializerGroups = {"product_details"}
+     *     )
      * @Rest\Put(
      *     path = "/products/{id}",
      *     name = "app_product_update",
@@ -306,9 +264,9 @@ class ProductController extends AbstractFOSRestController
      *     description="<b>Resticted to Admins</b><br>Edit a Product",
      *     tags={"Products"},
      *     @OA\Response(
-     *         response=201,
+     *         response=200,
      *         description="Success -> Product updated",
-     *         @Model(type=Product::class),
+     *         @Model(type=Product::class, groups={"product_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -366,5 +324,53 @@ class ProductController extends AbstractFOSRestController
         $product->update($updatedProduct);
         $manager->flush();
         return $product;
+    }
+
+    /**
+     * Delete a product.
+     * @Rest\View(StatusCode = 204)
+     * @Rest\Delete(
+     *     path = "/products/{id}",
+     *     name = "app_product_delete",
+     *     requirements = {"id"="\d+"}
+     * )
+     * @OA\Delete (
+     *     description="<b>Resticted to Admins</b><br>Delete a Product",
+     *     tags={"Products"},
+     *     @OA\Response(
+     *         response=204,
+     *         description="Success -> Product deleted",
+     *     ),
+     *     @OA\Response(
+     *         response="400",
+     *         description="Bad request."
+     *     ),
+     *     @OA\Response(
+     *         response="401",
+     *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Invalid Product."
+     *     ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          required= true,
+     *          @OA\Schema(type="integer", minimum=1),
+     *          in="path",
+     *          description="Product's ID."
+     *     )
+     * )
+     */
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function deleteProduct(Product $product, EntityManagerInterface $manager)
+    {
+        $manager->remove($product);
+        $manager->flush();
+        return null;
     }
 }
