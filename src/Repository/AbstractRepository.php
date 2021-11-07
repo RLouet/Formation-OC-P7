@@ -9,13 +9,13 @@ use Pagerfanta\Pagerfanta;
 
 abstract class AbstractRepository extends ServiceEntityRepository
 {
-    protected function paginate(QueryBuilder $qb, int $limit = 20, int $page = 1): Pagerfanta
+    protected function paginate(QueryBuilder $queryBuilder, int $limit = 20, int $page = 1): Pagerfanta
     {
         if (0 >= $limit || 0 >= $page) {
             throw new \LogicException('Limit and page must be greater than 1');
         }
 
-        $pager = new Pagerfanta(new QueryAdapter($qb));
+        $pager = new Pagerfanta(new QueryAdapter($queryBuilder));
         $pager->setCurrentPage($page);
         $pager->setMaxPerPage($limit);
 
