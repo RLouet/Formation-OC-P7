@@ -22,19 +22,19 @@ class CompanyRepository extends AbstractRepository
 
     public function search(string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1): Pagerfanta
     {
-        $qb = $this
+        $queryBuilder = $this
             ->createQueryBuilder('c')
             ->select('c')
             ->addOrderBy('c.name', $order)
         ;
         if ($term) {
-            $qb
+            $queryBuilder
                 ->where('c.name LIKE :term OR c.email LIKE :term OR c.phone LIKE :term OR c.address LIKE :term OR c.zip LIKE :term OR c.city LIKE :term OR c.country LIKE :term')
                 ->setParameter('term', "%" . $term . "%")
             ;
         }
 
-        return $this->paginate($qb, $limit, $page);
+        return $this->paginate($queryBuilder, $limit, $page);
     }
 
     // /**

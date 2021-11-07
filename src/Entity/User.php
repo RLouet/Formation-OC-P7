@@ -145,6 +145,15 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[ORM\Column(type: "json")]
     #[Serializer\Groups(["users_list", "user_details"])]
     #[Serializer\Since("1.0")]
+    /**
+     * @OA\Property(
+     *     type="array",
+     *     @OA\Items(
+     *         type="string",
+     *         default="ROLE_USER"
+     *     )
+     * )
+     */
     private array $roles = [];
 
     #[ORM\ManyToOne(targetEntity: Company::class, inversedBy: "users")]

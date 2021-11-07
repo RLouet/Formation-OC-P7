@@ -22,26 +22,26 @@ class UserRepository extends AbstractRepository
 
     public function search(Company $company = null, string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1): Pagerfanta
     {
-        $qb = $this
+        $queryBuilder = $this
             ->createQueryBuilder('u')
             ->select('u')
             ->addOrderBy('u.lastName', $order)
             ->addOrderBy('u.firstName', $order)
         ;
         if ($company) {
-            $qb
+            $queryBuilder
                 ->where('u.company = :company')
                 ->setParameter('company', $company)
             ;
         }
         if ($term) {
-            $qb
+            $queryBuilder
                 ->andWhere('u.lastName LIKE :term OR u.firstName LIKE :term OR u.username LIKE :term OR u.email LIKE :term')
                 ->setParameter('term', "%" . $term . "%")
             ;
         }
 
-        return $this->paginate($qb, $limit, $page);
+        return $this->paginate($queryBuilder, $limit, $page);
     }
 
     // /**

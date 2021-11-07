@@ -21,20 +21,20 @@ class ProductRepository extends AbstractRepository
 
     public function search(string $term = null, string $order = 'ASC', int $limit = 20, int $page = 1): Pagerfanta
     {
-        $qb = $this
+        $queryBuilder = $this
             ->createQueryBuilder('p')
             ->select('p')
             ->addOrderBy('p.brand', $order)
             ->addOrderBy('p.name', $order)
             ;
         if ($term) {
-            $qb
+            $queryBuilder
                 ->where('p.name LIKE :term OR p.brand LIKE :term')
                 ->setParameter('term', "%" . $term . "%")
                 ;
         }
 
-        return $this->paginate($qb, $limit, $page);
+        return $this->paginate($queryBuilder, $limit, $page);
     }
 
     // /**
