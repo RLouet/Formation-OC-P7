@@ -1,5 +1,7 @@
 # Formation Développeur PHP / Symfony
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b317891471894dd182e14f3d6996cdec)](https://app.codacy.com/gh/RLouet/Formation-OC-P7?utm_source=github.com&utm_medium=referral&utm_content=RLouet/Formation-OC-P7&utm_campaign=Badge_Grade_Settings)
+
 ## Projet 7 : API REST BileMo
 
 ### Introduction
