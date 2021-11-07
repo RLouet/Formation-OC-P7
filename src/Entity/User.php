@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use JMS\Serializer\Annotation as Serializer;
@@ -13,9 +14,24 @@ use OpenApi\Annotations as OA;
 use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity("email")]
-#[UniqueEntity("username")]
+#[UniqueEntity(
+    fields: "email",
+    groups: ["user_create", "user_edit"]
+)]
+#[UniqueEntity(
+    fields: "username",
+    groups: ["user_create", "user_edit"]
+)]
 /**
+ * @Hateoas\Relation(
+ *     "create",
+ *     href = @Hateoas\Route(
+ *         "app_user_create",
+ *         parameters = {"company_id" = "expr(object.getCompany().getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
+ * )
  * @Hateoas\Relation(
  *     "self",
  *     href = @Hateoas\Route(
@@ -23,7 +39,16 @@ use Hateoas\Configuration\Annotation as Hateoas;
  *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
  *         absolute = true
  *     ),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "user_list"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list"})
+ * )
+ * @Hateoas\Relation(
+ *     "update",
+ *     href = @Hateoas\Route(
+ *         "app_user_update",
+ *         parameters = {"company_id" = "expr(object.getCompany().getId())", "user_id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
  * )
  * @Hateoas\Relation(
  *     "delete",
@@ -37,7 +62,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * @Hateoas\Relation(
  *     "company",
  *     embedded = @Hateoas\Embedded("expr(object.getCompany())"),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list"})
  * )
  */
 class User implements PasswordAuthenticatedUserInterface, UserInterface
@@ -45,28 +70,30 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_list", "user_create", "user_login"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details", "user_login"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
         pattern: '/^[a-zA-Z0-9]{5,128}$/',
         message: "Between 5 and 128 letters and numbers only."
     )]
+    #[Assert\NotBlank(groups: ["user_create"])]
     /**
      * @OA\Property(default="JeanBon")
      */
     private string $username;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Email]
+    #[Assert\NotBlank(groups: ["user_create"])]
     /**
      * @OA\Property(default="jeanbon@example.com")
      */
     private string $email;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -75,13 +102,14 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[Assert\Regex(
         pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
+    #[Assert\NotBlank(groups: ["user_create"])]
     /**
      * @OA\Property(default="Jean")
      */
     private string $lastName;
 
     #[ORM\Column(type: "string", length: 255)]
-    #[Serializer\Groups(["user_list", "user_create"])]
+    #[Serializer\Groups(["users_list", "user_create", "user_details"])]
     #[Serializer\Since("1.0")]
     #[Assert\Length(
         min: 2,
@@ -90,6 +118,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     #[Assert\Regex(
         pattern: '/^[^0-9_!¡?÷?¿\/\\+=@#$%ˆ&*(){}|~<>;:[\]]+$/'
     )]
+    #[Assert\NotBlank(groups: ["user_create"])]
     /**
      * @OA\Property(default="Bon")
      */
@@ -102,6 +131,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         min: 8,
         max: 128
     )]
+    #[Assert\NotBlank(groups: ["user_create"])]
     /**
      * @OA\Property(default="P@ssword!")
      */
@@ -113,7 +143,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     private \DateTimeInterface $registrationDate;
 
     #[ORM\Column(type: "json")]
-    #[Serializer\Groups(["user_list"])]
+    #[Serializer\Groups(["users_list", "user_details"])]
     #[Serializer\Since("1.0")]
     private array $roles = [];
 
@@ -123,7 +153,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     public function getUsername(): ?string
     {
-        return $this->username;
+        return $this->username ?? null;
     }
 
     public function setUsername(string $username): self
@@ -135,7 +165,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     public function getEmail(): ?string
     {
-        return $this->email;
+        return $this->email ?? null;
     }
 
     public function getUserIdentifier(): ?string
@@ -150,9 +180,9 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
         return $this;
     }
 
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
-        return $this->password;
+        return $this->password ?? null;
     }
 
     public function setPassword(string $password): self
@@ -164,7 +194,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     public function getLastName(): ?string
     {
-        return $this->lastName;
+        return $this->lastName ?? null;
     }
 
     public function setLastName(string $lastName): self
@@ -176,7 +206,7 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
 
     public function getFirstName(): ?string
     {
-        return $this->firstName;
+        return $this->firstName ?? null;
     }
 
     public function setFirstName(string $firstName): self
@@ -243,6 +273,26 @@ class User implements PasswordAuthenticatedUserInterface, UserInterface
     {
         $this->company = $company;
 
+        return $this;
+    }
+
+    public function update(User $user, UserPasswordHasherInterface $passwordHasher): self
+    {
+        if ($user->getUsername()) {
+            $this->username = $user->getUsername();
+        }
+        if ($user->getEmail()) {
+            $this->email = $user->getEmail();
+        }
+        if ($user->getLastName()) {
+            $this->lastName = $user->getLastName();
+        }
+        if ($user->getFirstName()) {
+            $this->firstName = $user->getFirstName();
+        }
+        if ($user->getPassword()) {
+            $this->password = $passwordHasher->hashPassword($user, $user->getPassword());
+        }
         return $this;
     }
 }

@@ -2,10 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Product;
-use App\Entity\PaginationPage;
+use App\Entity\Company;
 use App\Exception\RessourceValidationException;
-use App\Repository\ProductRepository;
+use App\Repository\CompanyRepository;
 use App\Service\PaginationPageService;
 use Doctrine\ORM\EntityManagerInterface;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
@@ -15,10 +14,12 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
+use App\Entity\PaginationPage;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
@@ -26,13 +27,13 @@ use Nelmio\ApiDocBundle\Annotation\Model;
 /**
  * @Rest\Route("/api")
  */
-class ProductController extends AbstractFOSRestController
+class CompanyController extends AbstractFOSRestController
 {
     /**
-     * BileMo's Products list.
+     * BileMo's Companies list.
      * @Rest\Get(
-     *     path = "/products",
-     *     name = "app_products_list"
+     *     path = "/companies",
+     *     name = "app_companies_list"
      * )
      * @Rest\QueryParam(
      *     name="keyword",
@@ -50,7 +51,7 @@ class ProductController extends AbstractFOSRestController
      *     name="limit",
      *     requirements="\d+",
      *     default="20",
-     *     description="Max number of product per page."
+     *     description="Max number of company per page."
      * )
      * @Rest\QueryParam(
      *     name="page",
@@ -59,22 +60,22 @@ class ProductController extends AbstractFOSRestController
      *     description="The pagination page."
      * )
      * @OA\Get (
-     *     description="<b>Resticted to Users and Admins</b><br>Products list",
-     *     tags={"Products"},
+     *     description="<b>Resticted to Admins</b><br>Companies list",
+     *     tags={"Companies"},
      *     @OA\Response(
      *         response=200,
-     *         description="Success -> Products list",
+     *         description="Success -> Companies list",
      *         @OA\JsonContent(
      *             type= "object",
      *             @OA\Property(
      *                 property="page",
-     *                 ref=@Model(type=PaginationPage::class, groups={"products_list"})
+     *                 ref=@Model(type=PaginationPage::class, groups={"companies_list"})
      *             ),
      *             @OA\Property(
-     *                 property="products",
+     *                 property="companies",
      *                 type="array",
      *                 @OA\Items(
-     *                 ref=@Model(type=Product::class, groups={"products_list"}),
+     *                 ref=@Model(type=Company::class, groups={"companies_list"}),
      *                 ),
      *             ),
      *         ),
@@ -111,21 +112,22 @@ class ProductController extends AbstractFOSRestController
      *     )
      * )
      */
-    public function getProductsList(ParamFetcherInterface $paramFetcher, ProductRepository $productRepository, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService): Response
+    #[Security("is_granted('ROLE_ADMIN')")]
+    public function getCompaniesList(ParamFetcherInterface $paramFetcher, CompanyRepository $companyRepository, CacheInterface $cache, Request $request, PaginationPageService $paginationPageService): Response
     {
         $response = $cache->get(
-            'products-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
-            function (ItemInterface $item) use ($paramFetcher, $productRepository, $request, $paginationPageService) {
+            'companies-list-' . $paramFetcher->get("keyword") . "-" . $paramFetcher->get("order") . "-" . $paramFetcher->get("limit") . "-" .  $paramFetcher->get("page"),
+            function (ItemInterface $item) use ($paramFetcher, $companyRepository, $request, $paginationPageService) {
                 $item->expiresAfter(3600);
 
-                $pager = $productRepository->search(
+                $pager = $companyRepository->search(
                     $paramFetcher->get("keyword"),
                     $paramFetcher->get("order"),
                     $paramFetcher->get("limit"),
                     $paramFetcher->get("page")
                 );
 
-                return $paginationPageService->generatePage($request->get("_route"), $paramFetcher->all(), $pager, "products");
+                return $paginationPageService->generatePage($request->get("_route"), $paramFetcher->all(), $pager, "companies");
             }
         );
 
@@ -133,22 +135,22 @@ class ProductController extends AbstractFOSRestController
     }
 
     /**
-     * Create a product.
+     * Create a company.
      * @Rest\Post(
-     *     path = "/products",
-     *     name = "app_product_create",
+     *     path = "/companies",
+     *     name = "app_company_create",
      * )
      * @Rest\View(
      *     StatusCode = 201,
-     *     serializerGroups = {"product_details"}
+     *     serializerGroups = {"company_details"}
      * )
      * @OA\Post (
-     *     description="<b>Resticted to Admins</b><br>Create a new Product",
-     *     tags={"Products"},
+     *     description="<b>Resticted to Admins</b><br>Create a new Company",
+     *     tags={"Companies"},
      *     @OA\Response(
      *         response=201,
-     *         description="Success -> Product created",
-     *         @Model(type=Product::class, groups={"product_details"}),
+     *         description="Success -> Company created",
+     *         @Model(type=Company::class, groups={"company_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -168,25 +170,25 @@ class ProductController extends AbstractFOSRestController
      *     ),
      *     @OA\RequestBody(
      *          required= true,
-     *          description="Product",
-     *          @Model(type=Product::class,  groups={"product_create"}),
+     *          description="Company",
+     *          @Model(type=Company::class,  groups={"company_create"}),
      *     ),
      * )
      */
     #[ParamConverter(
-        "product",
+        "company",
         options: [
             'validator' => [
-                'groups' => ['product_create', 'Default']
+                'groups' => ['company_create', 'Default']
             ],
             'deserializationContext' => [
-                'groups' => ['product_create']
+                'groups' => ['company_create']
             ]
         ],
         converter: "fos_rest.request_body"
     )]
     #[Security("is_granted('ROLE_ADMIN')")]
-    public function createProduct(Product $product, ConstraintViolationList $violations, EntityManagerInterface $entityManager): View
+    public function createCompany(Company $company, ConstraintViolationList $violations, EntityManagerInterface $entityManager): View
     {
         if (count($violations)) {
             $exception = new RessourceValidationException();
@@ -196,77 +198,78 @@ class ProductController extends AbstractFOSRestController
             throw $exception;
         }
 
-        $entityManager->persist($product);
+        $company->init();
+
+        $entityManager->persist($company);
         $entityManager->flush();
         return $this->view(
-            $product,
+            $company,
             Response::HTTP_CREATED,
-            ['Location' => $this->generateUrl('app_product_show', ['id' => $product->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
+            ['Location' => $this->generateUrl('app_company_show', ['id' => $company->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
         );
     }
 
     /**
-     * Product details.
+     * Company details.
      * @Rest\Get(
-     *     path = "/products/{id}",
-     *     name = "app_product_show",
+     *     path = "/companies/{id}",
+     *     name = "app_company_show",
      *     requirements = {"id"="\d+"}
      * )
      * @Rest\View(
-     *     serializerGroups = {"product_details"}
+     *     serializerGroups = {"company_details"}
      * )
      * @OA\Get (
-     *     description="<b>Resticted to Users and Admins</b><br>Product details",
-     *     tags={"Products"},
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Company details",
+     *     tags={"Companies"},
      *     @OA\Response(
      *         response=200,
-     *         description="Success -> Product details",
-     *         @Model(type=Product::class, groups={"product_details"}),
+     *         description="Success -> Company details",
+     *         @Model(type=Company::class, groups={"company_details"}),
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Company not found."
      *     ),
      *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
-     *     ),
-     *     @OA\Response(
-     *         response="403",
-     *         description="Access denied."
-     *     ),
-     *     @OA\Response(
-     *         response="404",
-     *         description="Product not found."
      *     ),
      *     @OA\Parameter(
      *          name="id",
      *          required= true,
      *          @OA\Schema(type="integer"),
      *          in="path",
-     *          description="Product's ID."
+     *          description="Company's ID."
      *     )
      * )
      */
-    public function getProductDetails(Product $product): Product
+    public function getCompanyDetails(Company $company): Company
     {
-        return $product;
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
+        return $company;
     }
 
     /**
-     * Edit a Product.
+     * Edit a Company.
      * @Rest\View(
      *     StatusCode = 200,
-     *     serializerGroups = {"product_details"}
+     *     serializerGroups = {"company_details"}
      *     )
      * @Rest\Put(
-     *     path = "/products/{id}",
-     *     name = "app_product_update",
+     *     path = "/companies/{id}",
+     *     name = "app_company_update",
      *     requirements = {"id"="\d+"}
      * )
      * @OA\Put (
-     *     description="<b>Resticted to Admins</b><br>Edit a Product",
-     *     tags={"Products"},
+     *     description="<b>Resticted to Companie's Users and Admins</b><br>Edit a Company",
+     *     tags={"Companies"},
      *     @OA\Response(
      *         response=200,
-     *         description="Success -> Product updated",
-     *         @Model(type=Product::class, groups={"product_details"}),
+     *         description="Success -> Company updated",
+     *         @Model(type=Company::class, groups={"company_details"}),
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -289,30 +292,33 @@ class ProductController extends AbstractFOSRestController
      *          required= true,
      *          @OA\Schema(type="integer", minimum=1),
      *          in="path",
-     *          description="Product's ID."
+     *          description="Company's ID."
      *     ),
      *     @OA\RequestBody(
      *          required= true,
-     *          description="Product",
-     *          @Model(type=Product::class,  groups={"product_create"}),
+     *          description="Company",
+     *          @Model(type=Company::class,  groups={"company_create"}),
      *     ),
      * )
      */
     #[ParamConverter(
-        "updatedProduct",
+        "updatedCompany",
         options: [
             'validator' => [
-                'groups' => ['product_edit', 'Default']
+                'groups' => ['company_edit', 'Default']
             ],
             'deserializationContext' => [
-                'groups' => ['product_create']
+                'groups' => ['company_create']
             ]
         ],
         converter: "fos_rest.request_body"
     )]
-    #[Security("is_granted('ROLE_ADMIN')")]
-    public function editProduct(Product $product, Product $updatedProduct, ConstraintViolationList $violations, EntityManagerInterface $manager): Product
+    public function editCompany(Company $company, Company $updatedCompany, ConstraintViolationList $violations, EntityManagerInterface $manager): Company
     {
+        if(!$this->isGranted('ROLE_ADMIN') && $this->getUser()->getCompany() !== $company) {
+            throw new AccessDeniedHttpException("Access denied");
+        }
+
         if (count($violations)) {
             $exception = new RessourceValidationException();
             foreach ($violations as $violation) {
@@ -321,25 +327,25 @@ class ProductController extends AbstractFOSRestController
             throw $exception;
         }
 
-        $product->update($updatedProduct);
+        $company->update($updatedCompany);
         $manager->flush();
-        return $product;
+        return $company;
     }
 
     /**
-     * Delete a product.
+     * Delete a Company
      * @Rest\View(StatusCode = 204)
      * @Rest\Delete(
-     *     path = "/products/{id}",
-     *     name = "app_product_delete",
+     *     path = "/companies/{id}",
+     *     name = "app_company_delete",
      *     requirements = {"id"="\d+"}
      * )
      * @OA\Delete (
-     *     description="<b>Resticted to Admins</b><br>Delete a Product",
-     *     tags={"Products"},
+     *     description="<b>Resticted to Admins</b><br>Delete an Company",
+     *     tags={"Companies"},
      *     @OA\Response(
      *         response=204,
-     *         description="Success -> Product deleted",
+     *         description="Success -> Company deleted",
      *     ),
      *     @OA\Response(
      *         response="400",
@@ -355,21 +361,21 @@ class ProductController extends AbstractFOSRestController
      *     ),
      *     @OA\Response(
      *         response="404",
-     *         description="Invalid Product."
+     *         description="Invalid Company."
      *     ),
      *     @OA\Parameter(
      *          name="id",
      *          required= true,
      *          @OA\Schema(type="integer", minimum=1),
      *          in="path",
-     *          description="Product's ID."
+     *          description="Company's ID."
      *     )
      * )
      */
     #[Security("is_granted('ROLE_ADMIN')")]
-    public function deleteProduct(Product $product, EntityManagerInterface $manager)
+    public function deleteUser(Company $company, EntityManagerInterface $manager)
     {
-        $manager->remove($product);
+        $manager->remove($company);
         $manager->flush();
         return null;
     }

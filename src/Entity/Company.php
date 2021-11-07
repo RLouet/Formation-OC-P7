@@ -8,38 +8,138 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: CompanyRepository::class)]
-#[UniqueEntity("name")]
-#[UniqueEntity("email")]
+#[UniqueEntity(
+    fields: ["name"],
+    groups: ["company_create", "company_edit"]
+)]
+#[UniqueEntity(
+    fields: ["email"],
+    groups: ["company_create", "company_edit"]
+)]
+/**
+ * @Hateoas\Relation(
+ *     "create",
+ *     href = @Hateoas\Route(
+ *         "app_company_create",
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *         "app_company_show",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list", "company_details", "companies_list"})
+ * )
+ * @Hateoas\Relation(
+ *     "update",
+ *     href = @Hateoas\Route(
+ *         "app_company_update",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ * @Hateoas\Relation(
+ *     "delete",
+ *     href = @Hateoas\Route(
+ *         "app_company_delete",
+ *         parameters = {"id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ * @Hateoas\Relation(
+ *     "users",
+ *     href = @Hateoas\Route(
+ *         "app_users_list",
+ *         parameters = {"company_id" = "expr(object.getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"company_details"})
+ * )
+ */
 class Company
 {
     use EntityIdManagementTrait;
 
     #[ORM\Column(type: "string", length: 128, unique: true)]
-    #[Serializer\Groups(["user_details"])]
+    #[Serializer\Groups(["user_details", "company_details", "companies_list", "company_create"])]
     #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $name;
 
     #[ORM\Column(type: "string", length: 180, unique: true)]
+    #[Serializer\Groups(["company_details", "companies_list", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Email]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $email;
 
     #[ORM\Column(type: "string", length: 32)]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 6,
+        max: 32
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $phone;
 
     #[ORM\Column(type: "string", length: 255)]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 6,
+        max: 255
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $address;
 
-    #[ORM\Column(type: "integer")]
-    private int $zip;
+    #[ORM\Column(type: "string")]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Regex(
+        pattern: '/^[0-9]{5}$/',
+        message: "5 numbers only."
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
+    private string $zip;
 
     #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["company_details", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $city;
 
     #[ORM\Column(type: "string", length: 128)]
+    #[Serializer\Groups(["company_details", "companies_list", "company_create"])]
+    #[Serializer\Since("1.0")]
+    #[Assert\Length(
+        min: 1,
+        max: 128
+    )]
+    #[Assert\NotBlank(groups: ["company_create"])]
     private string $country;
 
     #[ORM\Column(type: "datetime")]
+    #[Serializer\Groups(["company_details"])]
+    #[Serializer\Since("1.0")]
     private \DateTimeInterface $registrationDate;
 
     #[ORM\OneToMany(
@@ -52,12 +152,18 @@ class Company
 
     public function __construct()
     {
+        $this->init();
+    }
+
+    public function init()
+    {
         $this->users = new ArrayCollection();
+        $this->setRegistrationDate(new \DateTime());
     }
 
     public function getName(): ?string
     {
-        return $this->name;
+        return $this->name ?? null;
     }
 
     public function setName(string $name): self
@@ -69,7 +175,7 @@ class Company
 
     public function getEmail(): ?string
     {
-        return $this->email;
+        return $this->email ?? null;
     }
 
     public function setEmail(string $email): self
@@ -81,7 +187,7 @@ class Company
 
     public function getPhone(): ?string
     {
-        return $this->phone;
+        return $this->phone ?? null;
     }
 
     public function setPhone(string $phone): self
@@ -93,7 +199,7 @@ class Company
 
     public function getAddress(): ?string
     {
-        return $this->address;
+        return $this->address ?? null;
     }
 
     public function setAddress(string $address): self
@@ -103,12 +209,12 @@ class Company
         return $this;
     }
 
-    public function getZip(): ?int
+    public function getZip(): ?string
     {
-        return $this->zip;
+        return $this->zip ?? null;
     }
 
-    public function setZip(int $zip): self
+    public function setZip(string $zip): self
     {
         $this->zip = $zip;
 
@@ -117,7 +223,7 @@ class Company
 
     public function getCity(): ?string
     {
-        return $this->city;
+        return $this->city ?? null;
     }
 
     public function setCity(string $city): self
@@ -129,7 +235,7 @@ class Company
 
     public function getCountry(): ?string
     {
-        return $this->country;
+        return $this->country ?? null;
     }
 
     public function setCountry(string $country): self
@@ -151,9 +257,6 @@ class Company
         return $this;
     }
 
-    /**
-     * @return Collection|User[]
-     */
     public function getUsers(): Collection
     {
         return $this->users;
@@ -178,6 +281,32 @@ class Company
             }
         }
 
+        return $this;
+    }
+
+    public function update(Company $company): self
+    {
+        if ($company->getName()) {
+            $this->name = $company->getName();
+        }
+        if ($company->getEmail()) {
+            $this->email = $company->getEmail();
+        }
+        if ($company->getPhone()) {
+            $this->phone = $company->getPhone();
+        }
+        if ($company->getAddress()) {
+            $this->address = $company->getAddress();
+        }
+        if ($company->getZip()) {
+            $this->zip = $company->getZip();
+        }
+        if ($company->getCity()) {
+            $this->city = $company->getCity();
+        }
+        if ($company->getCountry()) {
+            $this->country = $company->getCountry();
+        }
         return $this;
     }
 }
