@@ -61,8 +61,12 @@ use Hateoas\Configuration\Annotation as Hateoas;
  * )
  * @Hateoas\Relation(
  *     "company",
- *     embedded = @Hateoas\Embedded("expr(object.getCompany())"),
- *     exclusion = @Hateoas\Exclusion(groups = {"user_details", "users_list"})
+ *     href = @Hateoas\Route(
+ *         "app_company_show",
+ *         parameters = {"id" = "expr(object.getCompany().getId())"},
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(groups = {"user_details"})
  * )
  */
 class User implements PasswordAuthenticatedUserInterface, UserInterface

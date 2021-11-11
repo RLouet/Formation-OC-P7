@@ -228,12 +228,16 @@ class CompanyController extends AbstractFOSRestController
      *         @Model(type=Company::class, groups={"company_details"}),
      *     ),
      *     @OA\Response(
-     *         response="404",
-     *         description="Company not found."
-     *     ),
-     *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
+     *     ),
+     *     @OA\Response(
+     *         response="403",
+     *         description="Access denied."
+     *     ),
+     *     @OA\Response(
+     *         response="404",
+     *         description="Company not found."
      *     ),
      *     @OA\Parameter(
      *          name="id",
@@ -346,10 +350,6 @@ class CompanyController extends AbstractFOSRestController
      *     @OA\Response(
      *         response=204,
      *         description="Success -> Company deleted",
-     *     ),
-     *     @OA\Response(
-     *         response="400",
-     *         description="Bad request."
      *     ),
      *     @OA\Response(
      *         response="401",

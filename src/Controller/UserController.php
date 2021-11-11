@@ -537,10 +537,6 @@ class UserController extends AbstractFOSRestController
      *         description="Success -> User deleted",
      *     ),
      *     @OA\Response(
-     *         response="400",
-     *         description="Bad request."
-     *     ),
-     *     @OA\Response(
      *         response="401",
      *         description="Authentication required."
      *     ),

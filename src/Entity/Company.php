@@ -107,7 +107,7 @@ class Company
     #[Assert\NotBlank(groups: ["company_create"])]
     private string $address;
 
-    #[ORM\Column(type: "string")]
+    #[ORM\Column(type: "string", length: 16)]
     #[Serializer\Groups(["company_details", "company_create"])]
     #[Serializer\Since("1.0")]
     #[Assert\Regex(
